@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System;
+using System.Reflection;
+using HarmonyLib;
 using Masa.Menu;
 using Photon.Pun;
 using Photon.Realtime;
@@ -6,10 +8,15 @@ using UnityEngine;
 
 namespace Masa.Patches.Safety
 {
-    //[HarmonyPatch(typeof(PhotonView), nameof(PhotonView.RPC))]
+    //[HarmonyPatch]
     //class RPCPatch
     //{
     //    public static float Delay = 0f;
+
+    //    static MethodBase TargetMethod()
+    //    {
+    //        return AccessTools.Method(typeof(PhotonView), nameof(PhotonView.RPC), new Type[] { typeof(string), typeof(RpcTarget), typeof(object[]) });
+    //    }
 
     //    static bool Prefix()
     //    {
@@ -19,7 +26,7 @@ namespace Masa.Patches.Safety
     //            return false;
     //        }
 
-    //        Delay = Time.time + 0.2f;
+    //        Delay = Time.time + 0.1f;
     //        return true;
     //    }
     //}

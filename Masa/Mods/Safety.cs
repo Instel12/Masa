@@ -35,8 +35,15 @@ namespace Masa.Mods
         {
             foreach (VRRig rig in VRRigCache.ActiveRigs)
             {
-                if (PrivateManager.GetField<HashSet<string>>(rig, "_playerOwnedCosmetics").Any(x => x.Equals(id, StringComparison.OrdinalIgnoreCase)))
+                if (rig.OwnsCosmetic(id))
                 {
+                    if (Safety.CurrentSafetyAction != 1) Main.TrackerQueue.Add(new Main.TrackerData
+                    {
+                        CosmeticID = id,
+                        Room = PhotonNetwork.CurrentRoom.Name,
+                        Player = rig.Creator.NickName
+                    });
+
                     SafetyAction();
 
                     Notifications.SendNotification($"[<color=green>Anti Cosmetic</color>] {rig.Creator.NickName} owned the {name} so you have disconnected.");

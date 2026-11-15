@@ -10,6 +10,7 @@ namespace Masa.Patches.Safety
         {
             if (susReason.ToLower() != "empty rig")
                 Notifications.SendNotification($"[<color=red>Anti Cheat</color>] {susNick} has been reported for {susReason}.");
+
             return false;
         }
     }

@@ -469,6 +469,7 @@
     <Compile Include="Classes\PrivateManager.cs" />
     <Compile Include="Classes\TMPHelper.cs" />
     <Compile Include="Classes\VelocityTracker.cs" />
+    <Compile Include="Classes\WebLib.cs" />
     <Compile Include="Menu\Buttons.cs" />
     <Compile Include="Menu\Main.cs" />
     <Compile Include="Menu\Notifications.cs" />
@@ -491,12 +492,13 @@
     <Compile Include="Patches\NetworkTriggerPatch.cs" />
     <Compile Include="Patches\NormalizeNamePatch.cs" />
     <Compile Include="Patches\QuitBoxPatch.cs" />
+    <Compile Include="Patches\RankedPatch.cs" />
     <Compile Include="Patches\Safety\AnticheatPatch.cs" />
     <Compile Include="Patches\Safety\AntiRPCIncrement.cs" />
     <Compile Include="Patches\Safety\PlayfabNamePatch.cs" />
     <Compile Include="Patches\Safety\RigPatches.cs" />
     <Compile Include="Patches\Safety\RPCPatch.cs" />
-    <Compile Include="Patches\ShaderPatch.cs" />
+    <Compile Include="Patches\PrimitivePatch.cs" />
     <Compile Include="Patches\SubscriptionPatch.cs" />
     <Compile Include="Patches\TMPPatch.cs" />
     <Compile Include="PluginInfo.cs" />

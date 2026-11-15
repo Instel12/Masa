@@ -4,6 +4,8 @@ using UnityEngine;
 using GorillaLocomotion;
 using Photon.Pun;
 using UnityEngine.InputSystem;
+using GorillaLocomotion.Swimming;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Masa.Mods
 {
@@ -62,17 +64,20 @@ namespace Masa.Mods
         }
 
         public static bool GhostWait;
+        public static bool InGhost;
         public static void GhostMonke()
         {
             if (ControllerInputPoller.instance.rightControllerPrimaryButton && !GhostWait)
             {
                 GhostWait = true;
-                SetGhost(!VRRig.LocalRig.enabled);
+                InGhost = !InGhost;
             }
             else if (!ControllerInputPoller.instance.rightControllerPrimaryButton)
             {
                 GhostWait = false;
             }
+
+            VRRig.LocalRig.enabled = !InGhost;
         }
 
         public static void SetGhost(bool Enabled)
@@ -106,6 +111,26 @@ namespace Masa.Mods
                     rend.endWidth = 0.025f;
                     rend.startColor = rig.playerColor;
                     rend.endColor = rig.playerColor;
+                    GameObject.Destroy(rend, Time.deltaTime); // maybe it's ugly but it woks
+                }
+            }
+        }
+
+        public static void InfectionTracers()
+        {
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                if (rig.Creator.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    LineRenderer rend = new GameObject().AddComponent<LineRenderer>();
+                    rend.SetPosition(0, GTPlayer.Instance.LeftHand.controllerTransform.position);
+                    rend.SetPosition(1, rig.headMesh.transform.position);
+                    rend.material.shader = Shader.Find("GUI/Text Shader");
+                    rend.startWidth = 0.025f;
+                    rend.endWidth = 0.025f;
+                    Color clr = Main.IsTagged(rig) ? Color.red : Color.green;
+                    rend.startColor = clr;
+                    rend.endColor = clr;
                     GameObject.Destroy(rend, Time.deltaTime); // maybe it's ugly but it woks
                 }
             }
@@ -240,6 +265,85 @@ namespace Masa.Mods
             }
 
             Main.RefreshMods();
+        }
+
+        //public static float DoorDelay;
+        public static void OpenNaNoor(bool opened)
+        {
+            //if (DoorDelay < Time.time)
+            //{
+            //    DoorDelay = Time.time + 0.15f;
+                GameObject.Find("Environment Objects/LocalObjects_Prefab/CityToBasement/DungeonEntrance/DungeonDoor_Prefab").GetComponent<PhotonView>().RPC("ChangeDoorState", RpcTarget.AllViaServer, opened ? GTDoor.DoorState.Opening : GTDoor.DoorState.Closing);
+                Safety.FlushRPCs();
+            //}
+        }
+
+        public static bool DoorState = false;
+        public static void OpenNaNoorSpam()
+        {
+            //if (DoorDelay < Time.time)
+            //{
+                DoorState = !DoorState;
+                OpenNaNoor(DoorState);
+            //}
+        }
+
+        public static float SplashDelay = 0f;
+        public static void SplashWater(Vector3 position, Quaternion rotaion, float size, bool big)
+        {
+            if (NetworkSystem.Instance.InRoom)
+            {
+                if (SplashDelay < Time.time)
+                {
+                    SplashDelay = Time.time + 0.15f;
+                    if (Vector3.Distance(position, GTPlayer.Instance.headCollider.transform.position) > 3f)
+                    {
+                        VRRig.LocalRig.enabled = false;
+                        VRRig.LocalRig.transform.position = position - Vector3.up;
+                    }
+                    else
+                    {
+                        VRRig.LocalRig.enabled = true;
+                    }
+
+                    //Vector3 splashPosition, Quaternion splashRotation, float splashScale, float boundingRadius, bool bigSplash, bool enteringWater
+                    GorillaTagger.Instance.myVRRig.SendRPC("RPC_PlaySplashEffect", RpcTarget.All, position, rotaion, size, size, big, false);
+                    Safety.FlushRPCs();
+                }
+            }
+        }
+
+        public static void SplashHands()
+        {
+            bool big = Random.Range(0, 1) == 1;
+            if (ControllerInputPoller.instance.leftGrab) SplashWater(GTPlayer.Instance.LeftHand.controllerTransform.position, GTPlayer.Instance.LeftHand.controllerTransform.rotation, 5, big);
+            if (ControllerInputPoller.instance.rightGrab) SplashWater(GTPlayer.Instance.RightHand.controllerTransform.position, GTPlayer.Instance.RightHand.controllerTransform.rotation, 5, big);
+        }
+
+        public static void Cum(bool me)
+        {
+            VRRig rig;
+
+            if (me) rig = VRRig.LocalRig;
+            else
+            {
+                GunData Data = Main.DeployGun(true);
+                if (Data.Triggering) rig = Data.Rig;
+                else rig = null;
+            }
+
+            if (rig != null) SplashWater(rig.transform.position - rig.transform.up * 0.4f + rig.transform.forward * 0.15f, Quaternion.identity, 5, Random.Range(0, 1) == 1);
+        }
+
+        public static void SplashGun()
+        {
+            GunData data = Main.DeployGun(false);
+            if (data.Triggering) SplashWater(data.Position, Quaternion.identity, 5, Random.Range(0, 1) == 1);
+        }
+
+        public static void Rainbow()
+        {
+            Main.SetColor(Color.HSVToRGB((Time.time / 5) % 1, 1, 1));
         }
     }
 }

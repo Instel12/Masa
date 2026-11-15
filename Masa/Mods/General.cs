@@ -1,7 +1,11 @@
-﻿using GorillaNetworking;
+﻿using System;
+using GorillaLocomotion;
+using GorillaNetworking;
 using Masa.Classes;
 using Masa.Menu;
+using Photon.Pun;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using static GorillaNetworking.CosmeticsController;
 
 namespace Masa.Mods
@@ -22,6 +26,7 @@ namespace Masa.Mods
             CosmeticsController.instance.unlockedShirts.Clear();
             CosmeticsController.instance.unlockedTagFX.Clear();
             CosmeticsController.instance.unlockedThrowables.Clear();
+            CosmeticsController.instance.unlockedHoverboards.Clear();
 
             foreach (CosmeticItem cosmetic in CosmeticsController.instance.allCosmetics)
             {
@@ -40,7 +45,8 @@ namespace Masa.Mods
             GunData Data = Main.DeployGun(true);
             if (Data.Triggering)
             {
-                string id = Data.Rig.Creator.GetPlayerRef().UserId;
+                //string id = Data.Rig.Creator.GetPlayerRef().UserId;
+                string id = NetworkSystem.Instance.GetUserID(Data.Rig.Creator.ActorNumber);
                 GUIUtility.systemCopyBuffer = id;
                 if (!PlayerIDWait) Notifications.SendNotification($"[<color=green>Player ID</color>] Copied ID: {id}");
                 PlayerIDWait = true;
@@ -54,6 +60,71 @@ namespace Masa.Mods
         public static void UnlockCompetetive()
         {
             GorillaComputer.instance.CompQueueUnlockButtonPress();
+        }
+
+        public static void PlayerInfoTags()
+        {
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                if (rig.Creator.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
+                {
+                    TextMesh txt = new GameObject().AddComponent<TextMesh>();
+
+                    txt.alignment = TextAlignment.Left;
+                    txt.anchor = TextAnchor.LowerLeft;
+                    txt.text = 
+                        $"Name: {rig.Creator.NickName}\n" +
+                        $"Color: <color=red>{Math.Round(rig.playerColor.r * 9)}</color> <color=green>{Math.Round(rig.playerColor.g * 9)}</color> <color=blue>{Math.Round(rig.playerColor.b * 9)}</color>\n" +
+                        $"FPS: <color={FPSColor(rig.GetFPS())}>{rig.GetFPS()}</color>\n" +
+                        $"Creation Date: {rig.GetCreationDate()}\n";
+                    txt.transform.position = rig.headMesh.transform.position;
+                    txt.transform.LookAt(GTPlayer.Instance.headCollider.transform.position);
+                    txt.transform.Rotate(0, 180, 0);
+                    txt.fontSize = 50;
+                    txt.transform.localScale = Vector3.one * 0.01f;
+
+                    GameObject.Destroy(txt, Time.deltaTime); // maybe it's ugly but it woks
+                }
+            }
+        }
+
+        public static string FPSColor(float fps)
+        {
+            if (fps >= 70) return "green";
+            if (fps >= 45) return "yellow";
+            return "red";
+        }
+
+        private static Vector3? oldLocalPosition = null;
+        public static void PCButtonClick()
+        {
+            if (Mouse.current.leftButton.isPressed)
+            {
+                Ray ray = Camera.allCameras[1].ScreenPointToRay(Mouse.current.position.ReadValue());
+                Physics.Raycast(ray, out var Ray, 512f, GTPlayer.Instance.locomotionEnabledLayers);
+
+                if (oldLocalPosition == null) oldLocalPosition = GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition;
+                GorillaTagger.Instance.rightHandTriggerCollider.GetComponent<TransformFollow>().enabled = false;
+                GorillaTagger.Instance.rightHandTriggerCollider.transform.position = Ray.point;
+            }
+            else
+            {
+                if (oldLocalPosition != null)
+                {
+                    GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition = oldLocalPosition.Value;
+                    oldLocalPosition = null;
+                }
+                GorillaTagger.Instance.rightHandTriggerCollider.GetComponent<TransformFollow>().enabled = true;
+            }
+        }
+
+        public static void DisablePCButtonClick()
+        {
+            if (oldLocalPosition != null)
+            {
+                GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition = oldLocalPosition.Value;
+                oldLocalPosition = null;
+            }
         }
     }
 }

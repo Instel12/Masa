@@ -73,7 +73,7 @@ namespace Masa.Classes
                             }
                         }
 
-                        Main.SavePrefs();
+                        Main.SavePrefs(false);
                     }
                 }
 

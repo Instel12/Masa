@@ -75,6 +75,15 @@ namespace Masa.Mods
             }
         }
 
+        public static bool EveryoneTagged()
+        {
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                if (!rig.IsTagged()) return false;
+            }
+            return true;
+        }
+
         public static void TagAll()
         {
             if (NetworkSystem.Instance.RoomPlayerCount > 3)
@@ -83,15 +92,33 @@ namespace Masa.Mods
                 {
                     if (!rig.IsTagged()) TagPlayer(rig);
                 }
-                VRRig.LocalRig.enabled = true;
-                
             }
             else
             {
-                Notifications.SendNotification($"[<color=red>Error</color>] There's only {NetworkSystem.Instance.RoomPlayerCount} players in the room.");
+                Notifications.SendNotification($"[<color=red>Error</color>] There's only {NetworkSystem.Instance.RoomPlayerCount} player(s) in the room.");
             }
 
-            Buttons.Buttans[Buttons.GetIndex("Tag All")].Enabled = false;
+            if (EveryoneTagged())
+            {
+                Buttons.Buttans[Buttons.GetIndex("Tag All")].Enabled = false;
+                VRRig.LocalRig.enabled = true;
+            }
+        }
+
+        public static void TargetSpam()
+        {
+            if (NetworkSystem.Instance.IsMasterClient)
+            {
+                foreach (HitTargetNetworkState hitTargetNetworkState in GameObject.FindObjectsByType<HitTargetNetworkState>(FindObjectsSortMode.None))
+                {
+                    PrivateManager.SetField(hitTargetNetworkState, "hitCooldownTime", 0);
+                    hitTargetNetworkState.TargetHit(Vector3.zero, Vector3.zero);
+                }
+            }
+            else
+            {
+                Notifications.SendNotification($"[<color=red>Error</color>] You are not master.");
+            }
         }
     }
 }

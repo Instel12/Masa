@@ -28,11 +28,11 @@ namespace Masa.Classes
         }
         public static Type GetClass(object obj, string className)
         {
-            return obj.GetType().GetNestedType(
-                className,
-                BindingFlags.Public | BindingFlags.NonPublic
-            );
+            return obj.GetType().GetNestedType(className, BindingFlags.Public | BindingFlags.NonPublic);
         }
-
+        public static MethodInfo GetMethod(object obj, string methodName)
+        {
+            return obj.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        }
     }
 }

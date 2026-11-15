@@ -15,8 +15,6 @@ namespace Masa.Patches
         public static TextMeshPro Header;
         public static TextMeshPro Body;
 
-        public static bool OverrideMOTD = true;
-
         public static void FindThem()
         {
             if (Header == null) Header = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/motdHeadingText").GetComponent<TextMeshPro>();
@@ -26,7 +24,6 @@ namespace Masa.Patches
         public static void CustomMOTD()
         {
             FindThem();
-            OverrideMOTD = true;
 
             Header.characterSpacing = 0;
             Body.characterSpacing = 0;
@@ -39,7 +36,6 @@ namespace Masa.Patches
         public static void StockMOTD()
         {
             FindThem();
-            OverrideMOTD = false;
 
             Main.UnregisterTMP(Header);
             Main.UnregisterTMP(Body);
@@ -54,7 +50,7 @@ namespace Masa.Patches
 
         static bool Prefix(PlayFabTitleDataTextDisplay __instance)
         {
-            return !OverrideMOTD;
+            return false;
         }
     }
 }

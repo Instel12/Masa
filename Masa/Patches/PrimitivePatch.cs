@@ -1,14 +1,16 @@
 ﻿using HarmonyLib;
+using Masa.Menu;
 using UnityEngine;
 
 namespace Masa.Patches
 {
     [HarmonyPatch(typeof(GameObject), nameof(GameObject.CreatePrimitive))]
-    static class ShaderPatch
+    static class PrimitivePatch
     {
-        static void Postfix(GameObject __result)
+        static void Postfix(GameObject __result, PrimitiveType type)
         {
             __result.GetComponent<Renderer>().material.shader = Shader.Find("Universal Render Pipeline/Unlit");
+            //__result.GetComponent<Renderer>().material.shader = Main.ToonShader;
         }
     }
 }

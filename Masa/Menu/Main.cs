@@ -14,12 +14,24 @@ using System;
 using BepInEx;
 using System.IO;
 using System.Linq;
+using PlayFab.ClientModels;
+using PlayFab;
+using UnityEngine.Networking;
+using System.Collections;
+using static Bindings;
 
 namespace Masa.Menu
 {
     [HarmonyPatch(typeof(GTPlayer), "LateUpdate")]
     static class Main
     {
+        [System.Serializable]
+        public class AdminConfig
+        {
+            public string CurrentVersion;
+            public string[] Admins;
+        }
+
         public static bool MenuButton;
         public static bool LeftHandMenu;
 
@@ -35,6 +47,7 @@ namespace Masa.Menu
         public static Material BreadMaterial;
         public static Material SelectMaterial;
         public static Material StarMaterial;
+        public static Shader ToonShader;
 
         public static Material CrystalMaterial;
         public static bool CrystalMenu;
@@ -56,6 +69,8 @@ namespace Masa.Menu
         public static bool TimeFooter = false;
         public static bool FPSFooter = false;
 
+        public static bool PageNumber = true;
+
         public static bool DisableDisconnectButton = false;
 
         public static bool EventLogs = false;
@@ -70,6 +85,11 @@ namespace Masa.Menu
 
         public static bool SmoothMode = true;
         public static float SmoothSpeed = 10f;
+
+        public static float MenuScale = 0.75f;
+
+        public static string BackendURL;
+        public static List<string> AdminIDs = new List<string>();
 
         public static string[] MOTDs = new string[]
         {
@@ -93,6 +113,7 @@ namespace Masa.Menu
             PreviousPage,
         }
 
+        public static float LastTrackerSend = 0f;
         static void Postfix()
         {
             try
@@ -145,7 +166,7 @@ namespace Masa.Menu
                     Pointer.transform.position += Pointer.transform.forward * 0.1f;
 
                     string originalTitle = UseCustomTitle ? CustomTitle : PluginInfo.Title;
-                    string tempTitle = AnimatedTitle ? originalTitle.Substring(0, (int)Mathf.PingPong(Time.time * 3f, originalTitle.Length + 1)) : originalTitle;
+                    string tempTitle = AnimatedTitle ? originalTitle.Substring(0, (int)Mathf.PingPong(Time.time * 3f, originalTitle.Length + 1)) : originalTitle + (PageNumber ? $" [<color=grey>{CurrentPage}</color>]" : "");
                     if (TimeFooter) tempTitle += $"\n<size=0.1>{DateTime.Now.ToString("hh:mm tt")}</size>";
                     if (FPSFooter) tempTitle += $"\n<size=0.1>{Mathf.Round(1f / Time.unscaledDeltaTime)} FPS</size>";
                     CurrentTitle.text = tempTitle;
@@ -166,6 +187,15 @@ namespace Masa.Menu
                 else
                 {
                     DestroyMenu();
+                }
+
+                if (!File.Exists(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt")))
+                {
+                    SetupFileSystem();
+                }
+                else
+                {
+                    CustomTitle = File.ReadAllLines(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt"))[0];
                 }
                 #endregion
                 #region Ghost Rig
@@ -202,21 +232,20 @@ namespace Masa.Menu
                     catch { }
                 }
 
-                Notifications.Update();
-                #endregion
-
                 if (PhotonNetwork.InRoom) LastRoom = PhotonNetwork.CurrentRoom.Name;
+                else AlreadyTrackedActors.Clear();
 
-                if (!File.Exists(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt")))
-                {
-                    SetupFileSystem();
-                }
-                else
-                {
-                    CustomTitle = File.ReadAllLines(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt"))[0];
-                }
-
+                Notifications.Update();
                 Emotes.Update();
+                #endregion
+                #region Tracker
+                if (Time.time > LastTrackerSend && TrackerQueue.Count != 0)
+                {
+                    LastTrackerSend = Time.time + 1f;
+                    CoroutineRunner.Coroutine(SendTrackerRequest(TrackerQueue[0].Player, TrackerQueue[0].CosmeticID, TrackerQueue[0].Room));
+                    TrackerQueue.Remove(TrackerQueue[0]);
+                }
+                #endregion
             }
             catch (Exception ex)
             {
@@ -255,50 +284,71 @@ namespace Masa.Menu
         public static bool HasInit;
         public static void Init()
         {
-            HasInit = true;
+            try
+            {
+                WebLib.Request("https://raw.githubusercontent.com/Instel12/CurrentServer/refs/heads/main/url", (string output) =>
+                {
+                    BackendURL = output.Trim();
 
-            RefreshMods();
+                    WebLib.Request($"{BackendURL}/Masa.json", (string output2) =>
+                    {
+                        AdminConfig config = JsonUtility.FromJson<AdminConfig>(output2);
 
-            GameObject.DontDestroyOnLoad(new GameObject().AddComponent<UI>());
-            PhotonNetwork.NetworkingClient.EventReceived += Admin.EventReceived;
-            PhotonNetwork.NetworkingClient.EventReceived += EventReceived;
-            PhotonNetwork.NetworkingClient.EventReceived += Movement.ReceivePlatform;
+                        AdminIDs.Clear();
 
-            MainBundle = AssetTools.LoadBundle("Masa/Resources/masa");
+                        foreach (string admin in config.Admins)
+                        {
+                            AdminIDs.Add(admin);
+                        }
 
-            MenuFont = MainBundle.LoadAsset<TMP_FontAsset>("Minecraft SDF");
-            NotificationSound = MainBundle.LoadAsset<AudioClip>("Ding");
-            ChamsShader = MainBundle.LoadAsset<Shader>("TMP_SDF Overlay");
-            BreadMaterial = MainBundle.LoadAsset<Material>("Bread");
-            SelectMaterial = MainBundle.LoadAsset<Material>("Select");
-            StarMaterial = MainBundle.LoadAsset<Material>("Star");
+                        Buttons.Buttans[Buttons.GetIndex("Admin")].Note = null;
+                    });
+                });
 
-            NetworkSystem.Instance.OnPlayerJoined += OnJoin;
-            NetworkSystem.Instance.OnPlayerLeft += OnLeave;
+                GameObject.DontDestroyOnLoad(new GameObject().AddComponent<UI>());
+                PhotonNetwork.NetworkingClient.EventReceived += Admin.EventReceived;
+                PhotonNetwork.NetworkingClient.EventReceived += EventReceived;
+                PhotonNetwork.NetworkingClient.EventReceived += Movement.ReceivePlatform;
 
-            WhiteSquareLol = new Texture2D(1, 1);
-            WhiteSquareLol.SetPixel(0, 0, Color.white);
-            WhiteSquareLol.Apply();
+                MainBundle = AssetTools.LoadBundle("Masa/Resources/masa");
 
-            //MOTDPatch.CustomMOTD();
-            Movement.InitMaps();
-            SetupFileSystem();
-            Soundboard.Refresh();
-            Fun.SetupEverySoundSpam();
+                MenuFont = MainBundle.LoadAsset<TMP_FontAsset>("Minecraft SDF");
+                NotificationSound = MainBundle.LoadAsset<AudioClip>("Ding");
+                ChamsShader = MainBundle.LoadAsset<Shader>("TMP_SDF Overlay");
+                BreadMaterial = MainBundle.LoadAsset<Material>("Bread");
+                SelectMaterial = MainBundle.LoadAsset<Material>("Select");
+                StarMaterial = MainBundle.LoadAsset<Material>("Star");
+                ToonShader = MainBundle.LoadAsset<Shader>("Toon");
 
-            LoadPrefs();
-            LoadFavorites();
+                NetworkSystem.Instance.OnPlayerJoined += OnJoin;
+                NetworkSystem.Instance.OnPlayerLeft += OnLeave;
 
-            CrystalMaterial = GameObject.Find("Environment Objects/LocalObjects_Prefab/ForestToCave/C_Crystal_Chunk").GetComponent<Renderer>().material;
+                WhiteSquareLol = new Texture2D(1, 1);
+                WhiteSquareLol.SetPixel(0, 0, Color.white);
+                WhiteSquareLol.Apply();
 
-            //AudioSource src = new GameObject().AddComponent<AudioSource>();
-            //src.loop = true;
-            //src.clip = GorillaTagger.Instance.rightHandSlideSource.clip;
-            //src.Play();
+                Movement.InitMaps();
+                Soundboard.Refresh();
+                Fun.SetupEverySoundSpam();
 
-            if (Buttons.Buttans[Buttons.GetIndex("Auto Download Emotes")].Enabled) Emotes.Download();
+                SetupFileSystem();
+                LoadPrefs();
+                LoadFavorites();
 
-            Notifications.SendNotification($"[<color=blue>Sup!</color>] Thank you for downloading the {PluginInfo.Title} Menu!");
+                RefreshMods();
+
+                CrystalMaterial = GameObject.Find("Environment Objects/LocalObjects_Prefab/ForestToCave/C_Crystal_Chunk").GetComponent<Renderer>().material;
+
+                if (Buttons.Buttans[Buttons.GetIndex("Auto Download Emotes")].Enabled) Emotes.Download();
+
+                Notifications.SendNotification($"[<color=blue>Sup!</color>] Thank you for downloading the {PluginInfo.Title} Menu!");
+
+                HasInit = true;
+            }
+            catch(Exception ex)
+            {
+                Debug.LogError("Masa" + ex);
+            }
         }
 
         public static void SetupFileSystem()
@@ -309,6 +359,7 @@ namespace Masa.Menu
             Directory.CreateDirectory(RootPath);
             Directory.CreateDirectory(SoundboardPath);
             if (!File.Exists(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt"))) File.WriteAllText(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt"), "Custom Title");
+            //if (!File.Exists(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "FavoriteMods.txt"))) File.WriteAllText(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "FavoriteMods.txt"), "");
         }
 
         public static GameObject CurrentMenu;
@@ -344,7 +395,7 @@ namespace Masa.Menu
                 if (SmoothMode) CurrentMenu.transform.position = HandState.handFollower.position;
 
                 CurrentMenu.GetComponent<Renderer>().material.color = Color.white;
-                CurrentMenu.transform.localScale = new Vector3(MenuWidth, 0.35f, 0.01f) * 0.75f;
+                CurrentMenu.transform.localScale = new Vector3(MenuWidth, 0.35f, 0.01f) * MenuScale;
             }
 
             if (Pointer == null)
@@ -484,7 +535,7 @@ namespace Masa.Menu
             }
         }
 
-        public static void SavePrefs()
+        public static void SavePrefs(bool LoadAfter)
         {
             string saveFile = "# This file is pretty open to be edited.\n# If your menu is broken or something, you can delete a line with the mod name that's breaking it.\n\n";
 
@@ -498,6 +549,8 @@ namespace Masa.Menu
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             File.WriteAllText(filePath, saveFile);
+
+            if (LoadAfter) LoadPrefs();
         }
 
         public static void LoadPrefs()
@@ -506,7 +559,7 @@ namespace Masa.Menu
 
             if (!File.Exists(filePath))
             {
-                SavePrefs();
+                SavePrefs(true);
                 return;
             }
 
@@ -674,9 +727,72 @@ namespace Masa.Menu
             return closest;
         }
 
+        public static List<int> AlreadyTrackedActors = new List<int>();
+        public class TrackerData
+        {
+            public string Room;
+            public string Player;
+            public string CosmeticID;
+        }
+        public static List<TrackerData> TrackerQueue = new List<TrackerData>();
+
         public static void OnJoin(NetPlayer player)
         {
             Notifications.SendNotification($"[<color=green>Join</color>] {player.NickName} has joined!");
+
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                rig.GetCosmeticsPlayFabCatalogData(CheckCosmetics);
+            }
+        }
+
+        public static void CheckCosmetics()
+        {
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                if (AlreadyTrackedActors.Contains(rig.Creator.ActorNumber) || !PrivateManager.GetField<bool>(rig, "initializedCosmetics")) continue;
+                foreach (string id in TrackerIDs)
+                {
+                    if (rig.OwnsCosmetic(id))
+                    {
+                        TrackerQueue.Add(new TrackerData
+                        {
+                            Room = PhotonNetwork.CurrentRoom.Name,
+                            Player = rig.Creator.NickName,
+                            CosmeticID = id
+                        });
+                    }
+                }
+                AlreadyTrackedActors.Add(rig.Creator.ActorNumber);
+            }
+        }
+
+        public static string[] TrackerIDs = new string[]
+        {
+            //"LHAAC.",
+
+            "LBAAD.",
+            "LBAAK.",
+            "LMAPY.",
+            "LBADE.",
+            "LBAGS.",
+
+            "LBAAZ.",
+            "LMAJA.",
+            "LBANI.",
+            "LBAAE.",
+        };
+
+        public static IEnumerator SendTrackerRequest(string player, string cosmeticID, string room)
+        {
+            using (UnityWebRequest request = UnityWebRequest.Get($"{BackendURL}/Tracker"))
+            {
+                request.SetRequestHeader("Room", room);
+                request.SetRequestHeader("Player", player);
+                request.SetRequestHeader("ID", cosmeticID);
+
+                yield return request.SendWebRequest();
+            }
         }
 
         public static void OnLeave(NetPlayer player)
@@ -684,12 +800,16 @@ namespace Masa.Menu
             Notifications.SendNotification($"[<color=red>Leave</color>] {player.NickName} has left.");
         }
 
+        public static float ColorAndStuffDelay = 0f;
         public static void SetName(string New)
         {
             try
             {
-                if (GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(PhotonNetwork.LocalPlayer.UserId) && CosmeticWardrobeProximityDetector.IsUserNearWardrobe(PhotonNetwork.LocalPlayer.ActorNumber))
+                if (GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(PhotonNetwork.LocalPlayer.UserId) && CosmeticWardrobeProximityDetector.IsUserNearWardrobe(PhotonNetwork.LocalPlayer.ActorNumber) && ColorAndStuffDelay < Time.time)
+                {
+                    ColorAndStuffDelay = Time.time + 0.2f;
                     GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, VRRig.LocalRig.playerColor.r, VRRig.LocalRig.playerColor.g, VRRig.LocalRig.playerColor.b);
+                }
             }
             catch { }
             GorillaComputer.instance.currentName = New;
@@ -712,8 +832,11 @@ namespace Masa.Menu
             GorillaTagger.Instance.UpdateColor(New.r, New.g, New.b);
             PlayerPrefs.Save();
 
-            if (GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(PhotonNetwork.LocalPlayer.UserId) && CosmeticWardrobeProximityDetector.IsUserNearWardrobe(PhotonNetwork.LocalPlayer.ActorNumber))
+            if (GorillaComputer.instance.friendJoinCollider.playerIDsCurrentlyTouching.Contains(PhotonNetwork.LocalPlayer.UserId) && CosmeticWardrobeProximityDetector.IsUserNearWardrobe(PhotonNetwork.LocalPlayer.ActorNumber) && ColorAndStuffDelay < Time.time)
+            {
+                ColorAndStuffDelay = Time.time + 0.1f;
                 GorillaTagger.Instance.myVRRig.SendRPC("RPC_InitializeNoobMaterial", RpcTarget.All, New.r, New.g, New.b);
+            }
 
             Safety.FlushRPCs();
         }
@@ -721,6 +844,68 @@ namespace Masa.Menu
         public static bool IsTagged(this VRRig rig) // i mean, at least it works
         {
             return rig.mainSkin.material.name.ToLower().Contains("fected") || rig.mainSkin.material.name.ToLower().Contains("it");
+        }
+
+        public static readonly Dictionary<string, float> waitingForCreationDate = new Dictionary<string, float>();
+        public static readonly Dictionary<string, string> creationDateCache = new Dictionary<string, string>();
+
+        public static string GetCreationDate(this VRRig rig)
+        {
+            string playerId = rig.Creator.UserId;
+
+            if (creationDateCache.TryGetValue(playerId, out string date))
+                return date;
+
+            if (waitingForCreationDate.TryGetValue(playerId, out float retryTime))
+            {
+                if (Time.time <= retryTime) return "Loading...";
+            }
+
+            waitingForCreationDate[playerId] = Time.time + 10f;
+
+            PlayFabClientAPI.GetPlayerProfile(
+                new GetPlayerProfileRequest
+                {
+                    PlayFabId = playerId,
+                    ProfileConstraints = new PlayerProfileViewConstraints
+                    {
+                        ShowCreated = true
+                    }
+                },
+                result =>
+                {
+                    string formattedDate = result.PlayerProfile.Created.Value.ToString("MMM dd, yyyy").ToUpper();
+                    creationDateCache[playerId] = formattedDate;
+                    waitingForCreationDate.Remove(playerId);
+                },
+                error =>
+                {
+                    waitingForCreationDate.Remove(playerId);
+                }
+            );
+
+            return "Loading...";
+        }
+
+        public static bool OwnsCosmetic(this VRRig rig, string id)
+        {
+            if (PrivateManager.GetField<HashSet<string>>(rig, "_playerOwnedCosmetics").Any(x => x.Equals(id, StringComparison.OrdinalIgnoreCase))) return true;
+            return false;
+        }
+
+        public static int GetFPS(this VRRig rig)
+        {
+            try
+            {
+                RigContainer container = PrivateManager.GetField<RigContainer>(rig, "rigContainer");
+                int fps = PrivateManager.GetField<int>(rig, "fps");
+
+                return Mathf.Max(container.PlayerStats.FPS, fps);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public static AudioSource PlayOneShot2D(AudioClip Clip)

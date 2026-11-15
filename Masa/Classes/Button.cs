@@ -9,20 +9,22 @@ namespace Masa.Classes
     {
         public Buttons.Categories Category;
 
-        public string Title;
-        public string Note;
+        public string Title = "Untitled";
+        public string Note = null;
+        public string Description = "No description.";
 
-        public bool OneShot;
-        public bool Enabled;
-        public bool Favorite;
+        public bool OneShot = false;
+        public bool Enabled = false;
+        public bool Favorite = false;
+        public bool Master = false;
 
-        public Action EnableMethod;
-        public Action DisableMethod;
-        public Action Method;
-        public Action PrefixMethod;
+        public Action EnableMethod = null;
+        public Action DisableMethod = null;
+        public Action Method = null;
+        public Action PrefixMethod = null;
 
-        public int ShuffleValue;
-        public Action<object> ShuffleAction;
-        public Dictionary<string, Func<object>> ShuffleValues;
+        public int ShuffleValue = 0;
+        public Action<object> ShuffleAction = null;
+        public Dictionary<string, Func<object>> ShuffleValues = null;
     }
 }

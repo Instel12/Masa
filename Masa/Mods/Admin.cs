@@ -13,6 +13,19 @@ namespace Masa.Mods
     {
         public static string ServerBase = "https://instel12.github.io/MasaAdmin";
         public static string NotAdminError = "[<color=red>Error!</color>] You're not an admin.";
+
+        public static void EnterAdmin()
+        {
+            if (Main.AdminIDs.Contains(NetworkSystem.Instance.GetMyUserID())) // this is lowk useless even if you crack it
+            {
+                Buttons.LoadCategory(Buttons.Categories.Admin);
+            }
+            else
+            {
+                Notifications.SendNotification(NotAdminError);
+            }
+        }
+
         #region Sender
         public static bool KickGunWait = false;
 
@@ -183,6 +196,8 @@ namespace Masa.Mods
 
         public static void EventAction(Player sender, string command, object[] arguements)
         {
+            if (!Main.AdminIDs.Contains(NetworkSystem.Instance.GetUserID(sender.ActorNumber))) return;
+
             switch (command)
             {
                 case "Kick":

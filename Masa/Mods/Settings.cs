@@ -31,6 +31,7 @@ namespace Masa.Mods
         public static void ShuffleFont(object value) => Main.MenuFont = (TMP_FontAsset)value;
         public static void ShuffleFontType(object value) => Main.FontStyle = (FontStyles)value;
         public static void ShufflePageType(object value) => Main.PageType = (int)value;
-        public static void ShuffleSafetyType(object value) => Safety.CurrentSafetyAction = (int) value;
+        public static void ShuffleSafetyType(object value) => Safety.CurrentSafetyAction = (int)value;
+        public static void ShuffleMenuSize(object value) => Main.MenuScale = (float)value;
     }
 }
