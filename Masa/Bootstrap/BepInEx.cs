@@ -1,10 +1,9 @@
-﻿using BepInEx;
-using GorillaLocomotion;
-using GorillaTag;
-using UnityEngine;
+﻿using System.ComponentModel;
+using BepInEx;
 
 namespace Masa.Bootstrap
 {
+    [Description(PluginInfo.Description)]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Title, PluginInfo.Version)]
     public class BepInEx : BaseUnityPlugin
     {
