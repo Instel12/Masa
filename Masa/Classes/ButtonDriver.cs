@@ -56,18 +56,18 @@ namespace Masa.Classes
                                 ThisButton.Enabled = !ThisButton.Enabled;
                                 if (ThisButton.Enabled)
                                 {
-                                    Notifications.SendNotification($"[<color=green>Enable</color>] {ThisButton.Title}");
+                                    Notifications.SendNotification($"[<color=green>Enable</color>] {ThisButton.Title} - {ThisButton.Description}");
                                     ThisButton.EnableMethod?.Invoke();
                                 }
                                 else
                                 {
-                                    Notifications.SendNotification($"[<color=red>Disable</color>] {ThisButton.Title}");
+                                    Notifications.SendNotification($"[<color=red>Disable</color>] {ThisButton.Title} - {ThisButton.Description}");
                                     ThisButton.DisableMethod?.Invoke();
                                 }
                             }
                             else
                             {
-                                Notifications.SendNotification($"[<color=blue>One Shot</color>] {ThisButton.Title}");
+                                Notifications.SendNotification($"[<color=blue>One Shot</color>] {ThisButton.Title} - {ThisButton.Description}");
                                 ThisButton.Method?.Invoke();
                                 ThisButton.EnableMethod?.Invoke();
                             }
@@ -77,20 +77,11 @@ namespace Masa.Classes
                     }
                 }
 
-                if (Function == Main.ButtonFunction.Disconnect)
-                {
-                    Room.Disconnect();
-                }
+                if (Function == Main.ButtonFunction.Disconnect) Room.Disconnect();
+                if (Function == Main.ButtonFunction.Home) Buttons.LoadCategory(Buttons.Categories.Main);
 
-                if (Function == Main.ButtonFunction.NextPage)
-                {
-                    Buttons.NextPage();
-                }
-
-                if (Function == Main.ButtonFunction.PreviousPage)
-                {
-                    Buttons.PreviousPage();
-                }
+                if (Function == Main.ButtonFunction.NextPage) Buttons.NextPage();
+                if (Function == Main.ButtonFunction.PreviousPage) Buttons.PreviousPage();
 
                 VRRig.LocalRig.PlayHandTapLocal(66, !Main.LeftHandMenu, 50);
                 GorillaTagger.Instance.DoVibration(Main.LeftHandMenu ? XRNode.RightHand : XRNode.LeftHand, 1f, 0.1f);
@@ -128,6 +119,7 @@ namespace Masa.Classes
 
                 Text.text = ThisButton.Title;
                 if (!ThisButton.Note.IsNullOrEmpty()) Text.text += $" [<color=grey>{ThisButton.Note}</color>]";
+                if (ThisButton.Master && !NetworkSystem.Instance.IsMasterClient) Text.text += " [<color=grey>Master</color>]";
                 Renderer.material.color = ThisButton.Enabled ? Settings.CurrentTheme.Enabled : Settings.CurrentTheme.Disabled;
             }
 

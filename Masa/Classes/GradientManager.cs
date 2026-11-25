@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Masa.Menu;
+using Masa.Mods;
 using UnityEngine;
 
 namespace Masa.Classes
@@ -15,11 +17,11 @@ namespace Masa.Classes
         public static Color DisabledColor = Color.black;
         public static Color EnbaledColor = Color.red;
 
-        public static bool Rainbow = false;
-
         public static Color GetColor()
         {
-            if (Rainbow) return Color.HSVToRGB((Time.time / 5) % 1, 1, 1);
+            if (Settings.CurrentTheme.IsRainbow) return Color.HSVToRGB((Time.time / 5) % 1, 1, 1);
+            if (Settings.CurrentTheme.IsPastel) return Color.HSVToRGB((Time.time / 5) % 1, 0.4f, 1);
+            
             if (Colors.Count == 1) return Colors[0];
 
             float time = Mathf.Repeat(Time.time * Speed, Colors.Count - 1);

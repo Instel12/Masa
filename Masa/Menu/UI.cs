@@ -8,7 +8,7 @@ namespace Masa.Menu
     class UI : MonoBehaviour
     {
         public static string String = PluginInfo.Title;
-        private static bool Enabled = true;
+        public static bool Enabled = true;
 
         void OnGUI()
         {
@@ -21,7 +21,16 @@ namespace Masa.Menu
             if (GUI.Button(new Rect(10, 50, 240, 20), "Join Room")) PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(String, JoinType.Solo);
             if (GUI.Button(new Rect(10, 75, 240, 20), "Set Name")) Main.SetName(String);
 
-            GUI.Label(new Rect(5, Screen.height - 40, Screen.width, 40), "Press [F] to open the menu without a headset.\nPress [Right Alt] to toggle this UI.");
+            GUI.skin.label.alignment = TextAnchor.LowerRight;
+            GUI.Label(new Rect(5, 5, Screen.width - 10, Screen.height - 10), "Press [F] to open the menu without a headset.\nPress [Right Alt] to toggle this UI.");
+
+            GUI.skin.label.alignment = TextAnchor.LowerLeft;
+            string tempNotifications = "";
+            foreach (Notifications.Notification noti in Notifications.Notifications_)
+            {
+                tempNotifications += "\n" + noti.Message;
+            }
+            GUI.Label(new Rect(5, 5, Screen.width - 10, Screen.height - 10), tempNotifications);
         }
 
         void Update()

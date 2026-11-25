@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Masa.Classes
 {
@@ -29,6 +30,16 @@ namespace Masa.Classes
         public static Type GetClass(object obj, string className)
         {
             return obj.GetType().GetNestedType(className, BindingFlags.Public | BindingFlags.NonPublic);
+        }
+        public static Type GetMonoBehaviour(string className)
+        {
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type type = assembly.GetType(className);
+                if (type != null && typeof(MonoBehaviour).IsAssignableFrom(type)) return type;
+            }
+
+            return null;
         }
         public static MethodInfo GetMethod(object obj, string methodName)
         {

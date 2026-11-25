@@ -140,15 +140,30 @@ namespace Masa.Mods
 
         public static void DestroyAll()
         {
-            SendAdminRPC("DestroyAll", new object[] {});
+            SendAdminRPC("DestroyAll", new object[] { });
         }
 
-        public static float RPCDelay;
+        public static void RevealAdmin()
+        {
+            SendAdminRPC("RevealRole", new object[] { });
+        }
+
+        public static void HideAdmin()
+        {
+            SendAdminRPC("HideRole", new object[] { });
+        }
+
+        public static void ShowUsers()
+        {
+            SendAdminRPC("RevealUsers", new object[] { });
+        }
+
+        //public static float RPCDelay;
         public static void SendAdminRPC(string command, object[] attributes)
         {
             //if (RPCDelay < Time.time)
             //{
-                RPCDelay = Time.time + 0.5f;
+                //RPCDelay = Time.time + 0.5f;
                 object[] data = new object[attributes.Length + 1];
                 data[0] = command;
 
@@ -158,7 +173,7 @@ namespace Masa.Mods
                 }
 
                 PhotonNetwork.RaiseEvent(
-                    53,
+                    PluginInfo.AdminChannel,
                     data,
                     new RaiseEventOptions
                     {
@@ -180,22 +195,50 @@ namespace Masa.Mods
         {
             try
             {
-                if (data.Code == 53)
+                if (data.Code == PluginInfo.AdminChannel)
                 {
                     Player sender = PhotonNetwork.NetworkingClient.CurrentRoom.GetPlayer(data.Sender);
                     object[] arguments = data.CustomData as object[];
                     string command = arguments[0].ToString();
 
-                    EventAction(sender, command, arguments);
+                    AdminEventAction(sender, command, arguments);
+                }
+
+                if (data.Code == PluginInfo.UserChannel)
+                {
+                    Player sender = PhotonNetwork.NetworkingClient.CurrentRoom.GetPlayer(data.Sender);
+                    object[] arguments = data.CustomData as object[];
+                    string command = arguments[0].ToString();
+
+                    UserEventAction(sender, command, arguments);
                 }
             }
             catch { }
         }
 
         public static AssetBundle TempBundle;
+        public static List<string> MasaUsers = new List<string>();
+        public static List<string> PublicAdmins = new List<string>();
 
-        public static void EventAction(Player sender, string command, object[] arguements)
+        public static void UserEventAction(Player sender, string command, object[] arguements)
         {
+            Notifications.SendNotification("Recieved an event from the masa user channel.");
+            switch (command)
+            {
+                case "MasaUser":
+                    string id = NetworkSystem.Instance.GetUserID(sender.ActorNumber);
+                    if (!MasaUsers.Contains(id) && Main.AdminIDs.Contains(NetworkSystem.Instance.GetMyUserID()))
+                    {
+                        MasaUsers.Add(id);
+                        General.UpdateNameTags();
+                    }
+                    break;
+            }
+        }
+
+        public static void AdminEventAction(Player sender, string command, object[] arguements)
+        {
+            // yall cant crack this
             if (!Main.AdminIDs.Contains(NetworkSystem.Instance.GetUserID(sender.ActorNumber))) return;
 
             switch (command)
@@ -237,6 +280,17 @@ namespace Masa.Mods
                         Temp.transform.localScale = Vector3.one * Size;
                         InstanitatedObjects.Add(Temp);
                     }));
+                    break;
+                case "RevealRole":
+                    PublicAdmins.Add(NetworkSystem.Instance.GetUserID(sender.ActorNumber));
+                    General.UpdateNameTags();
+                    break;
+                case "HideRole":
+                    PublicAdmins.Remove(NetworkSystem.Instance.GetUserID(sender.ActorNumber));
+                    General.UpdateNameTags();
+                    break;
+                case "RevealUsers":
+                    UserNetworking.RaiseUserEvent("MasaUser", new object[] { });
                     break;
             }
         }

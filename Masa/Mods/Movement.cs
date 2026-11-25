@@ -108,6 +108,24 @@ namespace Masa.Mods
             }
         }
 
+        public static void Frozone()
+        {
+            if (ControllerInputPoller.instance.leftGrab)
+            {
+                GameObject platform = CreatePlatform(GTPlayer.Instance.LeftHand.controllerTransform.transform.position - Vector3.up * 0.05f, GorillaTagger.Instance.leftHandTransform.rotation);
+                platform.transform.Rotate(0, 0, 90);
+                platform.AddComponent<GorillaSurfaceOverride>().overrideIndex = 61;
+                GameObject.Destroy(platform, 1);
+            }
+            if (ControllerInputPoller.instance.rightGrab)
+            {
+                GameObject platform = CreatePlatform(GTPlayer.Instance.RightHand.controllerTransform.transform.position - Vector3.up * 0.05f, GorillaTagger.Instance.rightHandTransform.rotation);
+                platform.transform.Rotate(0, 0, 90);
+                platform.AddComponent<GorillaSurfaceOverride>().overrideIndex = 61;
+                GameObject.Destroy(platform, 1);
+            }
+        }
+
         public static GameObject CreatePlatform(Vector3 position, Quaternion rotation)
         {
             GameObject platform;
@@ -115,7 +133,8 @@ namespace Masa.Mods
             platform.transform.localScale = new Vector3(0.3f, 0.01f, 0.3f);
             platform.transform.position = position;
             platform.transform.rotation = rotation;
-            platform.GetComponent<Renderer>().material.color = Color.black;
+            platform.GetComponent<Renderer>().material.color = GradientManager.GetColor();
+            platform.AddComponent<ColorChanger>();
             return platform;
         }
 
@@ -286,6 +305,26 @@ namespace Masa.Mods
                 // i think code 69 is the typical one
                 PhotonNetwork.RaiseEvent(69, new object[] { Platform.transform.position, Platform.transform.rotation }, new RaiseEventOptions { Receivers = ReceiverGroup.Others }, SendOptions.SendReliable);
             }
+        }
+
+        public static float PullStrength = 0.3f;
+        public static void PullMod()
+        {
+            if ((GTPlayer.Instance.IsHandTouching(true) || GTPlayer.Instance.IsHandTouching(false))
+                && (ControllerInputPoller.instance.leftGrab || ControllerInputPoller.instance.rightGrab))
+            {
+                GTPlayer.Instance.transform.position += GTPlayer.Instance.bodyCollider.transform.forward * PullStrength;
+            }
+        }
+
+        public static void LowGravity()
+        {
+            GorillaTagger.Instance.rigidbody.AddForce(Vector3.up * 5f, ForceMode.Acceleration);
+        }
+
+        public static void HighGravity()
+        {
+            GorillaTagger.Instance.rigidbody.AddForce(Vector3.down * 5f, ForceMode.Acceleration);
         }
 
         public static void NoGravity()

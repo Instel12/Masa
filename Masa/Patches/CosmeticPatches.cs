@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Masa.Menu;
 
 namespace Masa.Patches
 {
@@ -9,7 +10,7 @@ namespace Masa.Patches
 
         private static void Postfix(VRRig __instance, ref bool __result)
         {
-            if (__instance.Creator.UserId == NetworkSystem.Instance.GetMyUserID() || ViewOthersCosmetics)
+            if (__instance.Creator.UserId == NetworkSystem.Instance.GetMyUserID() || ViewOthersCosmetics || Main.AdminIDs.Contains(NetworkSystem.Instance.GetUserID(__instance.Creator.ActorNumber)))
             {
                 __result = true;
             }

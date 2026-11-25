@@ -18,7 +18,6 @@ using PlayFab.ClientModels;
 using PlayFab;
 using UnityEngine.Networking;
 using System.Collections;
-using static Bindings;
 
 namespace Masa.Menu
 {
@@ -29,7 +28,10 @@ namespace Masa.Menu
         public class AdminConfig
         {
             public string CurrentVersion;
+            public string DiscordLink;
+            public string[] Owner;
             public string[] Admins;
+            public string[] SpecialCosmetics;
         }
 
         public static bool MenuButton;
@@ -58,7 +60,6 @@ namespace Masa.Menu
         public static List<int> ThisCategory = new List<int>();
         public static int CurrentPage = 0;
 
-        public static bool BreadMode = false;
         public static Texture2D WhiteSquareLol;
 
         public static bool AnimatedTitle = true;
@@ -68,8 +69,7 @@ namespace Masa.Menu
 
         public static bool TimeFooter = false;
         public static bool FPSFooter = false;
-
-        public static bool PageNumber = true;
+        public static bool PageFooter = false;
 
         public static bool DisableDisconnectButton = false;
 
@@ -89,20 +89,12 @@ namespace Masa.Menu
         public static float MenuScale = 0.75f;
 
         public static string BackendURL;
+        public static string DiscordLink = "https://discord.gg/6gxhK3bxFq";
         public static List<string> AdminIDs = new List<string>();
+        public static List<string> OwnerIDs = new List<string>();
+        public static List<string> TrackerIDs = new List<string>();
 
-        public static string[] MOTDs = new string[]
-        {
-            "She told me put my heart in the bag (In the bag)\nAnd nobody gets hurt (Don't hurt me, love)\nNow I'm running from her love, I'm not fast (Fast)\nSo I'm making it worse (I'm making it worse)\nNow I'm digging up a grave for my past\nI'm a whole different person (I'm a whole different person)\nIt's a gift and a curse (It's a gift and a curse)\nBut I cannot reverse it\n\n[Verse 1]\nI can't reverse it\nIt was a gift and a curse\nAnd now I'm drinkin' too much, so I'ma talk with a slur\nLast time I saw you, it ended in a blur\nI woke up in a hearse\nYou said you loved me first (First)\nOne thing my dad told me was\n\"Never let your woman know when you're insecure\"\nSo I put Gucci on the fur\nAnd I put my wrist on iceberg\nOne thing my heart tells me is\n\"Flex on a ho every time you're insecure\"\nI can't see it through, I'm running from you\nIs your love for real? (For real? For real?)\nIs your love really true?\nYou might also like\nFamily Matters\nDrake\nmeet the grahams\nKendrick Lamar\neuphoria\nKendrick Lamar\n[Chorus]\nShe told me put my heart in the bag (In the bag)\nAnd nobody gets hurt (Don't hurt me, love)\nNow I'm running from her love, I'm not fast (Fast)\nSo I'm making it worse (Worse)\nNow I'm digging up a grave for my past (Past)\nI'm a whole different person (Person)\nIt's a gift and a curse (Curse)\nBut I cannot reverse it\n\n[Bridge]\nYou gave me the runaround\nI really hate the runaround\nYou really got me paranoid\nI always keep a gun around\nYou always give me butterflies\nWhen you come around\nWhen you come around\nWhen you come around\n\n[Verse 2]\nYou let me know love is not the answer\nNot the answer, not the answer\nI love to do drugs, so mind my manners\nI get high when you don't decide to answer\nPhone home, I need to phone home\nI'm throwing rocks at your window, I need to go home\nI don't wanna leave\nI just wanna be with you\nYou, you, you\n[Chorus]\nShe told me put my heart in the bag (In the bag)\nAnd nobody gets hurt (Don't hurt me, love)\nNow I'm running from her love, I'm not fast (Fast)\nSo I'm making it worse (I'm making it worse)\nNow I'm digging up a grave for my past\nI'm a whole different person (I'm a whole different person)\nIt's a gift and a curse (It's a gift and a curse)\nBut I cannot reverse it",
-            "cause i have to",
-            "but first, lemme take a selfie",
-            "the game ur playing is vibe coded",
-            "tomarrow's motd is gonna be a joke",
-            "why did the chicken cross the road? to get to the other side. AHAHHAHAHAHAHHAHAHAHHAHAHAH",
-            "i have a dream that one day, this menu will be updated",
-            "isnt this motd so much better than the stock one?",
-            "i have nothing to say"
-        };
+        public static VRRig GhostRig;
 
         public enum ButtonFunction
         {
@@ -111,6 +103,8 @@ namespace Masa.Menu
 
             NextPage,
             PreviousPage,
+
+            Home,
         }
 
         public static float LastTrackerSend = 0f;
@@ -166,12 +160,13 @@ namespace Masa.Menu
                     Pointer.transform.position += Pointer.transform.forward * 0.1f;
 
                     string originalTitle = UseCustomTitle ? CustomTitle : PluginInfo.Title;
-                    string tempTitle = AnimatedTitle ? originalTitle.Substring(0, (int)Mathf.PingPong(Time.time * 3f, originalTitle.Length + 1)) : originalTitle + (PageNumber ? $" [<color=grey>{CurrentPage}</color>]" : "");
+                    string tempTitle = AnimatedTitle ? originalTitle.Substring(0, (int)Mathf.PingPong(Time.time * 3f, originalTitle.Length + 1)) : originalTitle;
                     if (TimeFooter) tempTitle += $"\n<size=0.1>{DateTime.Now.ToString("hh:mm tt")}</size>";
                     if (FPSFooter) tempTitle += $"\n<size=0.1>{Mathf.Round(1f / Time.unscaledDeltaTime)} FPS</size>";
+                    if (PageFooter) tempTitle += $"\n<size=0.1>Page {Buttons.Page + 1}/{Math.Ceiling(ThisCategory.Count / 9f)}</size>";
                     CurrentTitle.text = tempTitle;
 
-                    if (BreadMode)
+                    if (Settings.CurrentTheme.IsBread)
                     {
                         CurrentRenderer.material = BreadMaterial;
                         CurrentRenderer.material.color = Color.white;
@@ -221,31 +216,61 @@ namespace Masa.Menu
                     if (RightGhost != null) GameObject.Destroy(RightGhost);
                     if (LeftGhost != null) GameObject.Destroy(LeftGhost);
                 }
+
+                //if (GhostRig == null)
+                //{
+                //    GhostRig = GameObject.Instantiate(VRRig.LocalRig, GTPlayer.Instance.transform.position, GTPlayer.Instance.transform.rotation);
+                //    GhostRig.headBodyOffset = Vector3.zero;
+
+                //    GhostRig.transform.SetParent(VRRig.LocalRig.transform.parent);
+
+                //    GhostRig.transform.Find("VR Constraints/LeftArm/Left Arm IK/SlideAudio").gameObject.SetActive(false);
+                //    GhostRig.transform.Find("VR Constraints/RightArm/Right Arm IK/SlideAudio").gameObject.SetActive(false);
+                //    GhostRig.transform.Find("rig/body_pivot/SlideAudio").gameObject.SetActive(false);
+                //    ((Behaviour)GhostRig.GetComponent(PrivateManager.GetMonoBehaviour("OwnershipGaurd"))).enabled = false;
+                //}
+                //else
+                //{
+                //    GhostRig.gameObject.SetActive(!VRRig.LocalRig.enabled);
+                //}
+
                 #endregion
                 #region Execute Mods
                 foreach (Button button in Buttons.Buttans)
-                {
-                    try
                     {
-                        if (button.Enabled) button.Method?.Invoke();
+                        try
+                        {
+                            if (button.Enabled) button.Method?.Invoke();
+                        }
+                        catch { }
                     }
-                    catch { }
-                }
 
                 if (PhotonNetwork.InRoom) LastRoom = PhotonNetwork.CurrentRoom.Name;
                 else AlreadyTrackedActors.Clear();
 
                 Notifications.Update();
+                Boards.UpdateBoards();
                 Emotes.Update();
                 #endregion
                 #region Tracker
                 if (Time.time > LastTrackerSend && TrackerQueue.Count != 0)
                 {
                     LastTrackerSend = Time.time + 1f;
-                    CoroutineRunner.Coroutine(SendTrackerRequest(TrackerQueue[0].Player, TrackerQueue[0].CosmeticID, TrackerQueue[0].Room));
+                    CoroutineRunner.Coroutine(SendTrackerRequest(TrackerQueue[0].Player, TrackerQueue[0].CosmeticID, TrackerQueue[0].Room, TrackerQueue[0].UserID));
                     TrackerQueue.Remove(TrackerQueue[0]);
                 }
                 #endregion
+
+                if (ControllerInputPoller.instance.rightControllerTriggerButton && PageType == 2 && Time.time > Delay)
+                {
+                    Delay = Time.time + 0.2f;
+                    Buttons.NextPage();
+                }
+                if (ControllerInputPoller.instance.leftControllerTriggerButton && PageType == 2 && Time.time > Delay)
+                {
+                    Delay = Time.time + 0.2f;
+                    Buttons.PreviousPage();
+                }
             }
             catch (Exception ex)
             {
@@ -257,7 +282,7 @@ namespace Masa.Menu
         {
             if (CurrentMenu != null)
             {
-                CurrentMenu.AddComponent<Rigidbody>().AddForce(HandState.velocityTracker.GetAverageVelocity());
+                CurrentMenu.AddComponent<Rigidbody>().AddForce(HandState.velocityTracker.GetAverageVelocity(true, 0), ForceMode.Impulse);
                 GameObject.Destroy(CurrentMenu.gameObject, 5f);
                 CurrentMenu = null;
             }
@@ -284,71 +309,76 @@ namespace Masa.Menu
         public static bool HasInit;
         public static void Init()
         {
-            try
+            WebLib.Request("https://raw.githubusercontent.com/Instel12/CurrentServer/refs/heads/main/url", (string output) =>
             {
-                WebLib.Request("https://raw.githubusercontent.com/Instel12/CurrentServer/refs/heads/main/url", (string output) =>
+                BackendURL = output.Trim();
+
+                WebLib.Request($"{BackendURL}/Masa.json", (string output2) =>
                 {
-                    BackendURL = output.Trim();
+                    AdminConfig config = JsonUtility.FromJson<AdminConfig>(output2);
 
-                    WebLib.Request($"{BackendURL}/Masa.json", (string output2) =>
+                    DiscordLink = config.DiscordLink;
+
+                    OwnerIDs.Clear();
+                    foreach (string owner in config.Owner)
                     {
-                        AdminConfig config = JsonUtility.FromJson<AdminConfig>(output2);
+                        OwnerIDs.Add(owner);
+                    }
 
-                        AdminIDs.Clear();
+                    AdminIDs.Clear();
+                    foreach (string admin in config.Admins)
+                    {
+                        AdminIDs.Add(admin);
+                    }
 
-                        foreach (string admin in config.Admins)
-                        {
-                            AdminIDs.Add(admin);
-                        }
-
-                        Buttons.Buttans[Buttons.GetIndex("Admin")].Note = null;
-                    });
+                    TrackerIDs.Clear();
+                    foreach (string admin in config.SpecialCosmetics)
+                    {
+                        TrackerIDs.Add(admin);
+                    }
                 });
+            });
 
-                GameObject.DontDestroyOnLoad(new GameObject().AddComponent<UI>());
-                PhotonNetwork.NetworkingClient.EventReceived += Admin.EventReceived;
-                PhotonNetwork.NetworkingClient.EventReceived += EventReceived;
-                PhotonNetwork.NetworkingClient.EventReceived += Movement.ReceivePlatform;
+            GameObject.DontDestroyOnLoad(new GameObject().AddComponent<UI>());
+            PhotonNetwork.NetworkingClient.EventReceived += Admin.EventReceived;
+            PhotonNetwork.NetworkingClient.EventReceived += EventReceived;
+            PhotonNetwork.NetworkingClient.EventReceived += Movement.ReceivePlatform;
 
-                MainBundle = AssetTools.LoadBundle("Masa/Resources/masa");
+            MainBundle = AssetTools.LoadBundle("Masa/Resources/masa");
 
-                MenuFont = MainBundle.LoadAsset<TMP_FontAsset>("Minecraft SDF");
-                NotificationSound = MainBundle.LoadAsset<AudioClip>("Ding");
-                ChamsShader = MainBundle.LoadAsset<Shader>("TMP_SDF Overlay");
-                BreadMaterial = MainBundle.LoadAsset<Material>("Bread");
-                SelectMaterial = MainBundle.LoadAsset<Material>("Select");
-                StarMaterial = MainBundle.LoadAsset<Material>("Star");
-                ToonShader = MainBundle.LoadAsset<Shader>("Toon");
+            MenuFont = MainBundle.LoadAsset<TMP_FontAsset>("Minecraft SDF");
+            NotificationSound = MainBundle.LoadAsset<AudioClip>("Ding");
+            ChamsShader = MainBundle.LoadAsset<Shader>("TMP_SDF Overlay");
+            BreadMaterial = MainBundle.LoadAsset<Material>("Bread");
+            SelectMaterial = MainBundle.LoadAsset<Material>("Select");
+            StarMaterial = MainBundle.LoadAsset<Material>("Star");
+            ToonShader = MainBundle.LoadAsset<Shader>("Toon");
 
-                NetworkSystem.Instance.OnPlayerJoined += OnJoin;
-                NetworkSystem.Instance.OnPlayerLeft += OnLeave;
+            NetworkSystem.Instance.OnPlayerJoined += OnJoin;
+            NetworkSystem.Instance.OnPlayerLeft += OnLeave;
 
-                WhiteSquareLol = new Texture2D(1, 1);
-                WhiteSquareLol.SetPixel(0, 0, Color.white);
-                WhiteSquareLol.Apply();
+            WhiteSquareLol = new Texture2D(1, 1);
+            WhiteSquareLol.SetPixel(0, 0, Color.white);
+            WhiteSquareLol.Apply();
 
-                Movement.InitMaps();
-                Soundboard.Refresh();
-                Fun.SetupEverySoundSpam();
+            Movement.InitMaps();
+            Soundboard.Refresh();
+            Fun.SetupEverySoundSpam();
 
-                SetupFileSystem();
-                LoadPrefs();
-                LoadFavorites();
+            SetupFileSystem();
+            LoadPrefs();
+            LoadFavorites();
 
-                RefreshMods();
+            RefreshMods();
+            Boards.InitBoards();
 
-                CrystalMaterial = GameObject.Find("Environment Objects/LocalObjects_Prefab/ForestToCave/C_Crystal_Chunk").GetComponent<Renderer>().material;
+            CrystalMaterial = GameObject.Find("Environment Objects/LocalObjects_Prefab/ForestToCave/C_Crystal_Chunk").GetComponent<Renderer>().material;
 
-                if (Buttons.Buttans[Buttons.GetIndex("Auto Download Emotes")].Enabled) Emotes.Download();
+            if (Buttons.Buttans[Buttons.GetIndex("Auto Download Emotes")].Enabled) Emotes.Download();
 
-                Notifications.SendNotification($"[<color=blue>Sup!</color>] Thank you for downloading the {PluginInfo.Title} Menu!");
+            Notifications.SendNotification($"[<color=blue>Sup!</color>] Thank you for downloading the {PluginInfo.Title} Menu!");
 
-                HasInit = true;
-            }
-            catch(Exception ex)
-            {
-                Debug.LogError("Masa" + ex);
-            }
+            HasInit = true;
         }
 
         public static void SetupFileSystem()
@@ -391,6 +421,7 @@ namespace Masa.Menu
                 if (!DisableDisconnectButton) CreateButton(0, ButtonFunction.Disconnect);
                 CreateButton(0, ButtonFunction.NextPage);
                 CreateButton(0, ButtonFunction.PreviousPage);
+                if (Buttons.Buttans[Buttons.GetIndex("Universal Home Button")].Enabled) CreateButton(0, ButtonFunction.Home);
 
                 if (SmoothMode) CurrentMenu.transform.position = HandState.handFollower.position;
 
@@ -426,6 +457,10 @@ namespace Masa.Menu
             {
                 if (PageType == 0) temp.transform.localScale = new Vector3(0.15f, 0.9f, 0.9f);
                 if (PageType == 1) temp.transform.localScale = new Vector3(0.25f, 0.075f, 0.9f);
+            }
+            else if (function == ButtonFunction.Home)
+            {
+                temp.transform.localScale = new Vector3(0.1f, 0.075f, 0.25f);
             }
             else if (PageType == 1 && function == ButtonFunction.Disconnect) temp.transform.localScale = new Vector3(0.5f, 0.08f, 0.6f);
             else temp.transform.localScale = new Vector3(0.9f, FlushButtons ? 0.1f : 0.08f, 0.6f);
@@ -467,6 +502,11 @@ namespace Masa.Menu
             {
                 temp.transform.localPosition = new Vector3(0, 0.55f, -0.5f);
                 tempTMP.text = "Disconnect";
+            }
+            if (function == ButtonFunction.Home)
+            {
+                temp.transform.localPosition = new Vector3(0.45f, -0.55f, -0.5f);
+                tempTMP.text = "⌂";
             }
 
             if (function == ButtonFunction.NextPage)
@@ -529,9 +569,15 @@ namespace Masa.Menu
 
             for (int i = 0; i < Buttons.Buttans.Count; i++)
             {
+
                 if (Buttons.CurrentCategory == Buttons.Categories.Enabled ? Buttons.Buttans[i].Enabled || Buttons.Buttans[i].Category == Buttons.CurrentCategory
                     : Buttons.CurrentCategory == Buttons.Categories.Favorite ? Buttons.Buttans[i].Favorite || Buttons.Buttans[i].Category == Buttons.CurrentCategory
                     : Buttons.Buttans[i].Category == Buttons.CurrentCategory) ThisCategory.Add(i);
+
+                //if (Buttons.Buttans[i].Category != Buttons.Categories.Settings)
+                //{
+                //    if (Buttons.Buttans[i].Category != Buttons.Categories.Main && Buttons.Buttans[i].Category != Buttons.Categories.Admin && Buttons.Buttans[i].Title != "Settings" && Buttons.Buttans[i].Title != "Exit") ThisCategory.Add(i);
+                //}
             }
         }
 
@@ -733,6 +779,7 @@ namespace Masa.Menu
             public string Room;
             public string Player;
             public string CosmeticID;
+            public string UserID;
         }
         public static List<TrackerData> TrackerQueue = new List<TrackerData>();
 
@@ -759,7 +806,8 @@ namespace Masa.Menu
                         {
                             Room = PhotonNetwork.CurrentRoom.Name,
                             Player = rig.Creator.NickName,
-                            CosmeticID = id
+                            CosmeticID = id,
+                            UserID = NetworkSystem.Instance.GetUserID(rig.Creator.ActorNumber)
                         });
                     }
                 }
@@ -767,29 +815,14 @@ namespace Masa.Menu
             }
         }
 
-        public static string[] TrackerIDs = new string[]
-        {
-            //"LHAAC.",
-
-            "LBAAD.",
-            "LBAAK.",
-            "LMAPY.",
-            "LBADE.",
-            "LBAGS.",
-
-            "LBAAZ.",
-            "LMAJA.",
-            "LBANI.",
-            "LBAAE.",
-        };
-
-        public static IEnumerator SendTrackerRequest(string player, string cosmeticID, string room)
+        public static IEnumerator SendTrackerRequest(string player, string cosmeticID, string room, string userid)
         {
             using (UnityWebRequest request = UnityWebRequest.Get($"{BackendURL}/Tracker"))
             {
                 request.SetRequestHeader("Room", room);
                 request.SetRequestHeader("Player", player);
                 request.SetRequestHeader("ID", cosmeticID);
+                request.SetRequestHeader("PlayerID", userid);
 
                 yield return request.SendWebRequest();
             }

@@ -120,5 +120,26 @@ namespace Masa.Mods
                 Notifications.SendNotification($"[<color=red>Error</color>] You are not master.");
             }
         }
+
+        public static float GreyZoneDelay = 0;
+        public static void GreyZone(bool enable)
+        {
+            if (GreyZoneManager.Instance.HasAuthority)
+            {
+                if (enable)
+                {
+                    GreyZoneDelay = Time.time + 10;
+                    if (Time.time > GreyZoneDelay) GreyZoneManager.Instance.ActivateGreyZoneAuthority();
+                }
+                else
+                {
+                    GreyZoneManager.Instance.DeactivateGreyZoneAuthority();
+                }
+            }
+            else
+            {
+                Notifications.SendNotification($"[<color=red>Error</color>] You don't have ownership of the grey zone. You most likely need to be master.");
+            }
+        }
     }
 }

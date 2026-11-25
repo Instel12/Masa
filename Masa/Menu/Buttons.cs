@@ -41,7 +41,8 @@ namespace Masa.Menu
         {
             #region Main
                 new Button { Category = Categories.Main, Title = "Settings", Description = "Enters Settings.", OneShot = true, Method =() => LoadCategory(Categories.Settings) },
-                new Button { Category = Categories.Main, Title = "Admin", Note = "Loading", Description = "Enters Admin Mods.", OneShot = true, Method =() => Admin.EnterAdmin() },
+                new Button { Category = Categories.Main, Title = "<color=purple>Join Discord</color>", Description = "Join our tuff community.", OneShot = true, Method =() => General.JoinDiscord() },
+                new Button { Category = Categories.Main, Title = "Admin", Description = "Enters Admin Mods.", OneShot = true, Method =() => Admin.EnterAdmin() },
                 new Button { Category = Categories.Main, Title = "Enabled Mods", Description = "Enters Enabled Mods.", OneShot = true, Method =() => LoadCategory(Categories.Enabled) },
                 new Button { Category = Categories.Main, Title = "Favorite Mods", Description = "Enters Favorite Mods.", OneShot = true, Method =() => LoadCategory(Categories.Favorite) },
                 new Button { Category = Categories.Main, Title = "Movement", Description = "Enters Movement Mods", OneShot = true, Method =() => LoadCategory(Categories.Movement) },
@@ -74,104 +75,7 @@ namespace Masa.Menu
                         { "Utopium", () => Resources.FindObjectsOfTypeAll<TMP_FontAsset>().FirstOrDefault(x => x.name.ToLower().Contains("utopium")) },
                     }
                 },
-                new Button { Category = Categories.Settings, Title = "Shuffle Theme", Description = "Changes the theme.", ShuffleAction = value => Settings.ShuffleTheme(value),
-                    ShuffleValues = new Dictionary<string, Func<object>>
-                    {
-                        {
-                            "Masa", () => new Theme
-                            {
-                                Colors = new List<Color>
-                                {
-                                    Color.black,
-                                    new Color(0.5f, 0, 0),
-                                    Color.black
-                                }
-                            }
-                        },
-                        {
-                            "Hope Reborn", () => new Theme
-                            {
-                                Colors = new List<Color>
-                                {
-                                    Color.black,
-                                    Color.midnightBlue,
-                                    Color.black
-                                }
-                            }
-                        },
-                        {
-                            "GRAND", () => new Theme // i know alot about this menu cause it was my first one
-                            {
-                                Colors = new List<Color> { Color.yellow },
-                                FlushButtons = true
-                            }
-                        },
-                        {
-                            "Hudbud", () => new Theme
-                            {
-                                Colors = new List<Color> { Color.cyan }
-                            }
-                        },
-                        {
-                            "Dark", () => new Theme
-                            {
-                                Colors = new List<Color> { Color.black }
-                            }
-                        },
-                        {
-                            "ii's Stupid", () => new Theme
-                            {
-                                Colors = new List<Color>
-                                {
-                                    new Color32(255, 128, 0, 128),
-                                    new Color32(255, 102, 0, 128),
-                                    new Color32(255, 128, 0, 128)
-                                },
-                                Disabled = new Color32(226, 74, 44, 255),
-                                Enabled = new Color32(255, 102, 0, 128)
-                            }
-                        },
-                        {
-                            "Shiba Gold", () => new Theme
-                            {
-                                Colors = new List<Color>
-                                {
-                                    Color.black,
-                                    Color.yellow,
-                                    Color.black
-                                },
-                                Enabled = Color.magenta,
-                                Disabled = Color.yellow,
-                                ButtonColor = Color.black
-                            }
-                        },
-                        {
-                            "Seralyth", () => new Theme
-                            {
-                                Colors = new List<Color> { new Color32(22, 22, 22, 128) },
-                                Disabled = new Color32(118, 6, 252, 128),
-                                Enabled = new Color32(98, 0, 232, 128)
-                            }
-                        },
-                        {
-                            "Mango's Mods", () => new Theme
-                            {
-                                Colors = new List<Color> { Color.black },
-                                Disabled = Color.blue,
-                                Enabled = Color.magenta
-                            }
-                        },
-                        {
-                            "Aspect Menu", () => new Theme
-                            {
-                                Colors = new List<Color> { Color.black },
-                                Disabled = Color.black,
-                                Enabled = Color.grey,
-                                TitleColor = Color.red
-                            }
-                        }
-                    }
-                },
+                new Button { Category = Categories.Settings, Title = "Shuffle Theme", Description = "Changes the theme.", ShuffleAction = value => Settings.ShuffleTheme(value), ShuffleValues = Settings.Themes },
                 new Button { Category = Categories.Settings, Title = "Shuffle Font Type", Description = "Changes the style of the font.", ShuffleValue = 5, ShuffleAction = value => Settings.ShuffleFontType(value),
                     ShuffleValues = new Dictionary<string, Func<object>>
                     {
@@ -213,13 +117,20 @@ namespace Masa.Menu
                         { "Microscopic", () => 0.25f },
                     }
                 },
+                new Button { Category = Categories.Settings, Title = "Shuffle Pull Strength", Description = "Changes how much of a boost Pull Mod gives you.", ShuffleValue = 1, ShuffleAction = value => Settings.ShufflePullStrength(value),
+                    ShuffleValues = new Dictionary<string, Func<object>>
+                    {
+                        { "Small", () => 0.1f },
+                        { "Medium", () => 0.3f },
+                        { "High", () => 0.5f },
+                        { "Insane", () => 1f },
+                    }
+                },
 
                 new Button { Category = Categories.Settings, Title = "Left Hand Menu", Description = "Puts the menu in your left hand.", OneShot = false, EnableMethod =() => Main.LeftHandMenu = true, DisableMethod =() => Main.LeftHandMenu = false },
                 new Button { Category = Categories.Settings, Title = "Thick Menu", Description = "Makes the menu wider.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.4f, DisableMethod =() => Main.MenuWidth = 0.25f },
                 new Button { Category = Categories.Settings, Title = "Thin Menu", Description = "Makes the menu thin.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.15f, DisableMethod =() => Main.MenuWidth = 0.25f },
                 new Button { Category = Categories.Settings, Title = "Lerp Menu", Description = "Makes the menu's position smooth.", OneShot = false, EnableMethod =() => Main.SmoothMode = true, DisableMethod =() => Main.SmoothMode = false },
-                new Button { Category = Categories.Settings, Title = "Rainbow Menu", Description = "Makes the menu's primary color rainbow.", OneShot = false, EnableMethod =() => GradientManager.Rainbow = true, DisableMethod =() => GradientManager.Rainbow =  false },
-                new Button { Category = Categories.Settings, Title = "Bread Menu", OneShot = false, Description = "Makes the menu's background a stock image of bread.", EnableMethod =() => Main.BreadMode = true, DisableMethod =() => Main.BreadMode =  false },
                 new Button { Category = Categories.Settings, Title = "Crystal Menu", OneShot = false, Description = "Makes all menu materials like a crystal from the Caves map.", EnableMethod =() => Main.CrystalMenu = true, DisableMethod =() => Main.CrystalMenu =  false },
                 new Button { Category = Categories.Settings, Title = "Disable Disconnect Button", Description = "Removes the disconnect button.", OneShot = false, EnableMethod =() => Main.DisableDisconnectButton = true, DisableMethod =() => Main.DisableDisconnectButton =  false },
 
@@ -231,8 +142,12 @@ namespace Masa.Menu
 
                 new Button { Category = Categories.Settings, Title = "FPS Footer", Description = "Adds how many frames per second your game is running at under the title.", OneShot = false, EnableMethod =() => Main.FPSFooter = true, DisableMethod =() => Main.FPSFooter = false },
                 new Button { Category = Categories.Settings, Title = "Time Footer", Description = "Adds your device's time under the title.", OneShot = false, EnableMethod =() => Main.TimeFooter = true, DisableMethod =() => Main.TimeFooter = false },
+                new Button { Category = Categories.Settings, Title = "Page Footer", Description = "Adds the page number under the title.", OneShot = false, EnableMethod =() => Main.PageFooter = true, DisableMethod =() => Main.PageFooter = false },
 
+                new Button { Category = Categories.Settings, Title = "Universal Home Button", Description = "Adds a button to go home wherever you are.", OneShot = false },
                 new Button { Category = Categories.Settings, Title = "Disable Notifications", Description = "Makes you not recieve notifications.", OneShot = false, EnableMethod =() => Notifications.Enabled = false, DisableMethod =() => Notifications.Enabled = true },
+                new Button { Category = Categories.Settings, Title = "Streamer Notifications", Description = "Makes your notifications only show on the VR view.", OneShot = false },
+
                 new Button { Category = Categories.Settings, Title = "Custom Title", Description = "Makes the title the content of Gorilla Tag/Masa/CustomTitle.txt.", OneShot = false, EnableMethod =() => Main.UseCustomTitle = true, DisableMethod =() => Main.UseCustomTitle = false },
                 new Button { Category = Categories.Settings, Title = "Disable Custom MOTD", Description = "Returns the stock MOTD.", OneShot = false, EnableMethod =() => MOTDPatch.StockMOTD(), DisableMethod =() => MOTDPatch.CustomMOTD() },
                 new Button { Category = Categories.Settings, Title = "Auto Download Emotes", Description = "Downloads the emotes asset bundle when the menu initizes.", Enabled = true, OneShot = false },
@@ -244,7 +159,11 @@ namespace Masa.Menu
                 new Button { Category = Categories.Admin, Title = "Admin Crash Gun", Description = "Crashes the game of the player that you desire.", OneShot = false, Method =() => Admin.CrashGun() },
                 new Button { Category = Categories.Admin, Title = "Admin Teleport All Gun", Description = "Teleports all players to where you want.", OneShot = false, Method =() => Admin.TeleportGun() },
 
-                new Button { Category = Categories.Admin, Title = "Admin Spawn Plane", Description = "Teleports you to a big ahh plane.", OneShot = true, Method =() => Admin.SpawnPlane() },
+                new Button { Category = Categories.Admin, Title = "Admin Show Role", Description = "Shows all menu users your admin role under your name.", OneShot = true, Method =() => Admin.RevealAdmin() },
+                new Button { Category = Categories.Admin, Title = "Admin Hide Role", Description = "Hides from all menu users your admin role under your name.", OneShot = true, Method =() => Admin.HideAdmin() },
+                new Button { Category = Categories.Admin, Title = "Admin Show Menu Users", Description = "Shows under everyone's name if they are using Masa.", OneShot = true, Method =() => Admin.ShowUsers() },
+
+                //new Button { Category = Categories.Admin, Title = "Admin Spawn Plane", Description = "Teleports you to a big ahh plane.", OneShot = true, Method =() => Admin.SpawnPlane() },
 
                 new Button { Category = Categories.Admin, Title = "Admin Destroy All", Description = "Destroys everything an admin had made.", OneShot = true, Method =() => Admin.DestroyAll() },
                 new Button { Category = Categories.Admin, Title = "Admin Jail Gun", Description = "Puts the player in jail.", OneShot = false, Method =() => Admin.PrefabGun(true, "jail") },
@@ -282,12 +201,13 @@ namespace Masa.Menu
                 new Button { Category = Categories.Movement, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
                 new Button { Category = Categories.Movement, Title = "Fly", Description = "Allows you to fly.", OneShot = false, PrefixMethod =() => Movement.Fly() },
                 new Button { Category = Categories.Movement, Title = "Teleport Gun", Description = "Teleport to where you desire.", OneShot = false, Method =() => Movement.TeleportGun() },
+                new Button { Category = Categories.Movement, Title = "Sticky Platforms", Description = "Platforms but your hands stick to them.", OneShot = false, Method =() => Movement.StickyPlatforms() },
                 new Button { Category = Categories.Movement, Title = "Platforms", OneShot = false, Description = "Spawns a platform out of thin air.", Method =() => Movement.Platforms() },
+                new Button { Category = Categories.Movement, Title = "Frozone", OneShot = false, Description = "Makes you the guy from that one Disney movie.", Method =() => Movement.Frozone() },
                 new Button { Category = Categories.Movement, Title = "Noclip", Description = "Disables collision.", OneShot = false, Method =() => Movement.Noclip() },
                 //new Button { Category = Categories.Movement, Title = "Longarms", OneShot = false, Method =() => Movement.Longarms() },
                 //new Button { Category = Categories.Movement, Title = "Multiplied Longarms", OneShot = false, Method =() => Movement.MultipiedLongarms() },
                 //new Button { Category = Categories.Movement, Title = "Predictions", OneShot = false, Method =() => Movement.Predictions() },
-                new Button { Category = Categories.Movement, Title = "Sticky Platforms", Description = "Platforms but your hands stick to them.", OneShot = false, Method =() => Movement.StickyPlatforms() },
                 new Button { Category = Categories.Movement, Title = "Rig Gun", Description = "Puts your rig where you desire.", OneShot = false, Method =() => Movement.RigGun() },
                 new Button { Category = Categories.Movement, Title = "Keyboard Fly", Description = "Allows you to move with WASD.", OneShot = false, Method =() => Movement.KeyboardFly() },
                 new Button { Category = Categories.Movement, Title = "Teleport to Map", Description = "Enters a selection of maps to teleport to.", OneShot = true, Method =() => LoadCategory(Categories.Maps) },
@@ -295,6 +215,14 @@ namespace Masa.Menu
                 new Button { Category = Categories.Movement, Title = "Force Tag Freeze", Description = "Doesn't let you gain velocity like when you first get tagged.", OneShot = false, Method =() => GTPlayer.Instance.disableMovement = true, DisableMethod =() => GTPlayer.Instance.disableMovement = false },
                 new Button { Category = Categories.Movement, Title = "Networked Platforms Gun", Description = "Spawns platforms for people with networked platforms. (Compatible with other menus.)", OneShot = false, Method =() => Movement.NetworkedPlatformGun() },
                 new Button { Category = Categories.Movement, Title = "Networked Platforms", Description = "Allows you to see networked platforms. (Compatible with other menus.)", OneShot = false, EnableMethod =() => Movement.NetworkedPlatforms = true, DisableMethod =() => Movement.NetworkedPlatforms = false },
+                new Button { Category = Categories.Movement, Title = "Pull Mod", Description = "Pulls your player in the direction you are facing to make you faster.", OneShot = false, Method =() => Movement.PullMod() },
+                new Button { Category = Categories.Movement, Title = "Disable Wind Barriers", Description = "Wind barriers aint got shit on you!", OneShot = false, EnableMethod =() => WindPatch.WindDisabled = true, DisableMethod =() => WindPatch.WindDisabled = false },
+                new Button { Category = Categories.Movement, Title = "No Slip", Description = "Makes no surfaces slippery.", OneShot = false, EnableMethod =() => SlidePatch.NoSlip = true, DisableMethod =() => SlidePatch.NoSlip = false },
+                new Button { Category = Categories.Movement, Title = "All Slip", Description = "Makes all surfaces slippery.", OneShot = false, EnableMethod =() => SlidePatch.AllBlueWalls = true, DisableMethod =() => SlidePatch.AllBlueWalls = false },
+                new Button { Category = Categories.Movement, Title = "All Ice", Description = "Makes all surfaces fully slippery.", OneShot = false, EnableMethod =() => SlidePatch.AllRedWalls = true, DisableMethod =() => SlidePatch.AllRedWalls = false },
+                new Button { Category = Categories.Movement, Title = "Low Gravity", Description = "Makes the gravity less strong.", OneShot = false, Method =() => Movement.LowGravity() },
+                new Button { Category = Categories.Movement, Title = "High Gravity", Description = "Makes the gravity stronger.", OneShot = false, Method =() => Movement.HighGravity() },
+                new Button { Category = Categories.Movement, Title = "Zero Gravity", Description = "Makes gravity not pull you down.", OneShot = false, Method =() => Movement.HighGravity() },
                 #region Maps
                     new Button { Category = Categories.Maps, Title = "Exit", Description = "Returns to Movement Mods.", OneShot = true, Method =() => LoadCategory(Categories.Movement) },
                 #endregion
@@ -313,6 +241,7 @@ namespace Masa.Menu
             #region Fun
                 new Button { Category = Categories.Fun, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
                 new Button { Category = Categories.Fun, Title = "Ghost Monke", Description = "Lets you leave your body.", OneShot = false, Method =() => Fun.GhostMonke() },
+                new Button { Category = Categories.Fun, Title = "Invisible Monke", Description = "Lets you go invisible.", OneShot = false, Method =() => Fun.InvisMonke() },
                 new Button { Category = Categories.Fun, Title = "Copy Player Gun", Description = "Copies another player's rig.", OneShot = false, Method =() => Fun.CopyPlayer() },
                 new Button { Category = Categories.Fun, Title = "Fake Lag", Description = "Makes your rig lag.", OneShot = false, Method =() => Fun.FakeLag(), DisableMethod =() => VRRig.LocalRig.enabled = true },
                 new Button { Category = Categories.Fun, Title = "Casual Tracers", Description = "Puts tracers matching the player's color on everyone.", OneShot = false, Method =() => Fun.Tracers() },
@@ -321,10 +250,10 @@ namespace Masa.Menu
                 new Button { Category = Categories.Fun, Title = "No Finger Movement", Description = "Stops your fingers from moving.", OneShot = false, Method =() => Fun.NoFingerMovement() },
 
                 new Button { Category = Categories.Fun, Title = "Fix Head", Description = "Resets your head's rotation.", OneShot = true, Method =() => Fun.FixHead() },
-                new Button { Category = Categories.Fun, Title = "Head Spin [<color=grey>X</color>]", Description = "Spins your head on the X axis.", OneShot = false, Method =() => Fun.SpinHead("x"), DisableMethod =() => Fun.FixHead() },
-                new Button { Category = Categories.Fun, Title = "Head Spin [<color=grey>Y</color>]", Description = "Spins your head on the Y axis.", OneShot = false, Method =() => Fun.SpinHead("y"), DisableMethod =() => Fun.FixHead() },
-                new Button { Category = Categories.Fun, Title = "Head Spin [<color=grey>Z</color>]", Description = "Spins your head on the Z axis.", OneShot = false, Method =() => Fun.SpinHead("z"), DisableMethod =() => Fun.FixHead() },
-                new Button { Category = Categories.Fun, Title = "Spaz Head", Description = "Makes your head go insane.", OneShot = false, Method =() => Fun.SpazHead(), DisableMethod =() => Fun.FixHead() },
+                new Button { Category = Categories.Fun, Title = "Head Spin [<color=grey>X</color>]", Description = "Spins your head on the X axis.", OneShot = false, PrefixMethod =() => Fun.SpinHead("x"), DisableMethod =() => Fun.FixHead() },
+                new Button { Category = Categories.Fun, Title = "Head Spin [<color=grey>Y</color>]", Description = "Spins your head on the Y axis.", OneShot = false, PrefixMethod =() => Fun.SpinHead("y"), DisableMethod =() => Fun.FixHead() },
+                new Button { Category = Categories.Fun, Title = "Head Spin [<color=grey>Z</color>]", Description = "Spins your head on the Z axis.", OneShot = false, PrefixMethod =() => Fun.SpinHead("z"), DisableMethod =() => Fun.FixHead() },
+                new Button { Category = Categories.Fun, Title = "Spaz Head", Description = "Makes your head go insane.", OneShot = false, PrefixMethod =() => Fun.SpazHead(), DisableMethod =() => Fun.FixHead() },
 
                 new Button { Category = Categories.Fun, Title = "Sound Spam [<color=grey>Random</color>]", Description = "Spams a hand tap.", OneShot = false, Method =() => Fun.RandomSpam() },
                 new Button { Category = Categories.Fun, Title = "Sound Spam [<color=grey>Metal</color>]", Description = "Spams a hand tap.", OneShot = false, Method =() => Fun.SoundSpam(18) },
@@ -343,14 +272,29 @@ namespace Masa.Menu
                 new Button { Category = Categories.Fun, Title = "Cum Gun", Description = "Splashes water on your dihh.", OneShot = false, Method =() => Fun.Cum(false) },
 
                 new Button { Category = Categories.Fun, Title = "Rainbow Player", Description = "Makes your player's color rainbow.", OneShot = false, Method =() => Fun.Rainbow() },
+
+                new Button { Category = Categories.Fun, Title = "Grab Bug", Description = "Grab the bug from anywhere.", OneShot = false, Method =() => Fun.GrabBug() },
+                new Button { Category = Categories.Fun, Title = "Grab Bat", Description = "Grab the bat from anywhere.", OneShot = false, Method =() => Fun.GrabBat() },
+
+                new Button { Category = Categories.Fun, Title = "Bug Gun", Description = "Teleport the bug to wherever your point.", OneShot = false, Method =() => Fun.BugGun() },
+                new Button { Category = Categories.Fun, Title = "Bat Gun", Description = "Teleport the bat to wherever your point.", OneShot = false, Method =() => Fun.BatGun() },
+
+                new Button { Category = Categories.Fun, Title = "Become Bug", Description = "Lets you play as the bug.", OneShot = false, Method =() => Fun.BecomeBug(), DisableMethod =() => VRRig.LocalRig.enabled = true },
+                new Button { Category = Categories.Fun, Title = "Become Bat", Description = "Lets you play as the bat.", OneShot = false, Method =() => Fun.BecomeBat(), DisableMethod =() => VRRig.LocalRig.enabled = true },
+
+                new Button { Category = Categories.Fun, Title = "Reset Quest Score", Description = "Sets your quest score to 0.", OneShot = true, Method =() => Fun.SetQuestScore(0) },
+                new Button { Category = Categories.Fun, Title = "Max Quest Score", Description = "Sets your quest score to the max integer.", OneShot = true, Method =() => Fun.SetQuestScore(int.MaxValue) },
+                new Button { Category = Categories.Fun, Title = "Spaz Quest Score", Description = "Sets your quest score to random numbers.", OneShot = false, Method =() => Fun.SetQuestScore(Random.Range(0, 99999)) },
+
+                new Button { Category = Categories.Fun, Title = "Corrupt Textures", Description = "Makes the textures break in different ways every 10 seconds.", OneShot = false, Method =() => Fun.CorruptMode() },
                 #region Every Sound
                     new Button { Category = Categories.EverySound, Title = "Exit", Description = "Returns to Fun Mods.", OneShot = true, Method =() => LoadCategory(Categories.Fun) },
                 #endregion
 
-            new Button { Category = Categories.Fun, Title = "Slap", Description = "Slap other players.", OneShot = false, Method =() => Fun.Slap() },
+                new Button { Category = Categories.Fun, Title = "Slap", Description = "Slap other players.", OneShot = false, Method =() => Fun.Slap() },
             #endregion
             #region Safety
-                new Button { Category = Categories.Safety, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
+            new Button { Category = Categories.Safety, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
                 new Button { Category = Categories.Safety, Title = "Log Events", Description = "Sends a notification every time sombody sends a Photon event.", OneShot = false, EnableMethod =() => Main.EventLogs = true, DisableMethod =() => Main.EventLogs = false },
                 new Button { Category = Categories.Safety, Title = "Anti AFK Kick", Description = "Doesn't kick you when you're idle.", Enabled = true, OneShot = false, EnableMethod =() => PhotonNetworkController.Instance.disableAFKKick = true, DisableMethod =() => PhotonNetworkController.Instance.disableAFKKick = false },
                 new Button { Category = Categories.Safety, Title = "Disable Quit Box", Description = "Doesn't crash you when you fall out of the map.", Enabled = true, OneShot = false, EnableMethod =() => QuitBoxPatch.DisableQuitBox = true, DisableMethod =() => QuitBoxPatch.DisableQuitBox = false },
@@ -373,21 +317,25 @@ namespace Masa.Menu
             #endregion
             #region General
                 new Button { Category = Categories.General, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
-                new Button { Category = Categories.General, Title = "Normalize Names", Description = "Makes you see names like \"BADGORILLA\" again.", OneShot = false, EnableMethod =() => NormalizeNamePatch.Enabled = false, DisableMethod =() => NormalizeNamePatch.Enabled = true },
+                //new Button { Category = Categories.General, Title = "Normalize Names", Description = "Makes you see names like \"BADGORILLA\" again.", OneShot = false, EnableMethod =() => NameTagPatch.Enabled = false, DisableMethod =() => NameTagPatch.Enabled = true },
                 new Button { Category = Categories.General, Title = "View Other's Unowned Cosmetics", Description = "Lets you see what sombody has equipped even if they don't own it.", OneShot = false, EnableMethod =() => CosmeticPatches.ViewOthersCosmetics = true, DisableMethod =() => CosmeticPatches.ViewOthersCosmetics = false },
                 new Button { Category = Categories.General, Title = "Unlock All Cosmetics", Description = "Unlocks every cosmetic on your wardrobe.", OneShot = true, Method =() => General.UnlockAllCosmetics() },
+                new Button { Category = Categories.General, Title = "Lock All Cosmetics", Description = "Locks every cosmetic on your wardrobe.", OneShot = true, Method =() => General.LockAllCosmetics() },
                 new Button { Category = Categories.General, Title = "Copy ID Gun", Description = "Copies a player's ID.", OneShot = false, Method =() => General.GetPlayerIDGun() },
                 new Button { Category = Categories.General, Title = "Unlock VIM", Description = "Unlocks the Gorilla Tag Fan Club.", OneShot = false, EnableMethod =() => SubscriptionPatch.Enabled = true, DisableMethod =() => SubscriptionPatch.Enabled = false },
                 new Button { Category = Categories.General, Title = "Unlock Competetive", Description = "Unlocks the ability to play in competetive queue.", OneShot = true, Method =() => General.UnlockCompetetive() },
                 new Button { Category = Categories.General, Title = "Standalone Ranked Room", Description = "Allows you to join the standalone ranked lobbies.", OneShot = false, EnableMethod =() => RankedPatch.Enabled = true, DisableMethod =() => RankedPatch.Enabled = false },
                 new Button { Category = Categories.General, Title = "Player Info Tags", Description = "Puts some player info on top of everyone's head. (Looks like Untitled lol)", OneShot = false, Method =() => General.PlayerInfoTags() },
                 new Button { Category = Categories.General, Title = "PC Button Click", Description = "Lets you click buttons with your mouse.", OneShot = false, Method =() => General.PCButtonClick(), DisableMethod =() => General.DisablePCButtonClick() },
+                new Button { Category = Categories.General, Title = "Update Nametags", Description = "Refreshes everyone's nametag.", OneShot = true, Method =() => General.UpdateNameTags() },
             #endregion
             #region Overpowered
                 new Button { Category = Categories.Overpowered, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
                 new Button { Category = Categories.Overpowered, Title = "Tag Gun", Description = "Tags whoever you desire.", OneShot = false, Method =() => Overpowered.TagGun() },
                 new Button { Category = Categories.Overpowered, Title = "Tag All", Description = "Tags everyone.", OneShot = false, Method =() => Overpowered.TagAll(), DisableMethod =() => VRRig.LocalRig.enabled = true },
                 new Button { Category = Categories.Overpowered, Title = "Target Spam", Description = "Makes the targets go insane!", Master = true, OneShot = false, Method =() => Overpowered.TargetSpam() },
+                new Button { Category = Categories.Overpowered, Title = "Enable Grey Zone", Description = "Makes everyone's game grey.", Master = true, OneShot = false, Method =() => Overpowered.GreyZone(true) },
+                new Button { Category = Categories.Overpowered, Title = "Disable Grey Zone", Description = "Makes everyone's game full color again.", Master = true, OneShot = true, EnableMethod =() => Overpowered.GreyZone(false) },
             #endregion
             #region Credits
                 new Button { Category = Categories.Credits, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },

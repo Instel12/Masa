@@ -9,8 +9,15 @@ namespace Masa.Menu
 {
     class Notifications
     {
+        [Serializable]
+        public class Notification
+        {
+            public string Message;
+            public float SendTime;
+        }
+
         public static NotificationPosition Position = NotificationPosition.Head;
-        private static List<Notification> Notifications_ = new List<Notification>();
+        public static List<Notification> Notifications_ = new List<Notification>();
         private static TextMeshPro TMP;
 
         public static void Update()
@@ -42,6 +49,8 @@ namespace Masa.Menu
             }
 
             TMP.text = "";
+
+            TMP.gameObject.layer = Buttons.Buttans[Buttons.GetIndex("Streamer Notifications")].Enabled ? 19 : 0;
 
             for (int i = Notifications_.Count - 1; i >= 0; i--)
             {
@@ -77,12 +86,5 @@ namespace Masa.Menu
             Head,
             Hand
         }
-    }
-
-    [Serializable]
-    public class Notification
-    {
-        public string Message;
-        public float SendTime;
     }
 }

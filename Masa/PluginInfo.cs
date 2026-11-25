@@ -12,5 +12,8 @@ namespace Masa
         public const string Title = "Masa";
         public const string Author = "Instel";
         public const string Version = "1.0.0";
+
+        public const int AdminChannel = 53;
+        public const int UserChannel = 52;
     }
 }

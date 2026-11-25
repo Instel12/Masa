@@ -6,6 +6,7 @@ using Photon.Pun;
 using UnityEngine.InputSystem;
 using GorillaLocomotion.Swimming;
 using System.Diagnostics.Eventing.Reader;
+using Photon.Voice;
 
 namespace Masa.Mods
 {
@@ -78,6 +79,24 @@ namespace Masa.Mods
             }
 
             VRRig.LocalRig.enabled = !InGhost;
+        }
+
+        public static bool InvisWait;
+        public static bool InInvis;
+        public static void InvisMonke()
+        {
+            if (ControllerInputPoller.instance.rightControllerPrimaryButton && !InvisWait)
+            {
+                InvisWait = true;
+                InInvis = !InInvis;
+            }
+            else if (!ControllerInputPoller.instance.rightControllerPrimaryButton)
+            {
+                InvisWait = false;
+            }
+
+            VRRig.LocalRig.enabled = !InInvis;
+            if (InInvis) VRRig.LocalRig.transform.position = Vector3.one * 9999f;
         }
 
         public static void SetGhost(bool Enabled)
@@ -174,6 +193,7 @@ namespace Masa.Mods
             GTPlayer.Instance.GetControllerTransform(true).transform.rotation = GorillaTagger.Instance.rightHandTransform.rotation;
         }
 
+
         public static void NoFingerMovement()
         {
             VRRig.LocalRig.leftIndex.calcT = 1f;
@@ -192,12 +212,12 @@ namespace Masa.Mods
 
         public static void FixHead() => VRRig.LocalRig.head.trackingRotationOffset = Vector3.zero;
 
-        public static float HeadSpinSpeed = 10f;
+        public static float SpinSpeed = 500f;
         public static void SpinHead(string axis)
         {
-            if (axis == "x") VRRig.LocalRig.head.trackingRotationOffset.x += HeadSpinSpeed;
-            else if (axis == "y") VRRig.LocalRig.head.trackingRotationOffset.y += HeadSpinSpeed;
-            else if (axis == "z") VRRig.LocalRig.head.trackingRotationOffset.z += HeadSpinSpeed;
+            if (axis == "x") VRRig.LocalRig.head.trackingRotationOffset.x = Time.time * SpinSpeed;
+            else if (axis == "y") VRRig.LocalRig.head.trackingRotationOffset.y = Time.time * SpinSpeed;
+            else if (axis == "z") VRRig.LocalRig.head.trackingRotationOffset.z = Time.time * SpinSpeed;
         }
 
         public static void SpazHead()
@@ -344,6 +364,108 @@ namespace Masa.Mods
         public static void Rainbow()
         {
             Main.SetColor(Color.HSVToRGB((Time.time / 5) % 1, 1, 1));
+        }
+
+        public static void TeleportBug(Vector3 position, Quaternion rotation)
+        {
+            ThrowableBug bug = GameObject.Find("Floating Bug Holdable").GetComponent<ThrowableBug>();
+
+            if (bug.IsMyItem())
+            {
+                bug.transform.position = position;
+                bug.transform.rotation = rotation;
+            }
+            else
+            {
+                Notifications.SendNotification("[<color=red>Error</color>] You do not have ownership of the bug! Please manually grab it first.");
+            }
+        }
+
+        public static void TeleportBat(Vector3 position, Quaternion rotation)
+        {
+            ThrowableBug bug = GameObject.Find("Cave Bat Holdable").GetComponent<ThrowableBug>();
+
+            if (bug.IsMyItem())
+            {
+                bug.transform.position = position;
+                bug.transform.rotation = rotation;
+            }
+            else
+            {
+                Notifications.SendNotification("[<color=red>Error</color>] You do not have ownership of the bat! Please manually grab it first.");
+            }
+        }
+
+        public static void GrabBug()
+        {
+            if (ControllerInputPoller.instance.leftGrab) TeleportBug(GTPlayer.Instance.LeftHand.controllerTransform.position, Quaternion.identity);
+            if (ControllerInputPoller.instance.rightGrab) TeleportBug(GTPlayer.Instance.RightHand.controllerTransform.position, Quaternion.identity);
+        }
+
+        public static void GrabBat()
+        {
+            if (ControllerInputPoller.instance.leftGrab) TeleportBat(GTPlayer.Instance.LeftHand.controllerTransform.position, Quaternion.identity);
+            if (ControllerInputPoller.instance.rightGrab) TeleportBat(GTPlayer.Instance.RightHand.controllerTransform.position, Quaternion.identity);
+        }
+
+        public static void BugGun()
+        {
+            GunData data = Main.DeployGun(false);
+            if (data.Triggering) TeleportBug(data.Position + Vector3.up, Quaternion.identity);
+        }
+
+        public static void BatGun()
+        {
+            GunData data = Main.DeployGun(false);
+            if (data.Triggering) TeleportBat(data.Position + Vector3.up, Quaternion.identity);
+        }
+
+        public static void BecomeBug()
+        {
+            VRRig.LocalRig.enabled = false;
+            VRRig.LocalRig.transform.position = Vector3.one * 9999f;
+            TeleportBug(GTPlayer.Instance.headCollider.transform.position, GTPlayer.Instance.headCollider.transform.rotation);
+        }
+
+        public static void BecomeBat()
+        {
+            VRRig.LocalRig.enabled = false;
+            VRRig.LocalRig.transform.position = Vector3.one * 9999f;
+            TeleportBat(GTPlayer.Instance.headCollider.transform.position, GTPlayer.Instance.headCollider.transform.rotation);
+        }
+
+        public static float QuestDelay;
+        public static void SetQuestScore(int score)
+        {
+            if (QuestDelay < Time.time)
+            {
+                QuestDelay = Time.time + 1.5f;
+                VRRig.LocalRig.SetQuestScore(score);
+            }
+        }
+
+        public static float CorruptDelay;
+        public static void CorruptMode() // me and my friend found a gtag creepypasta thing so i decided to recreate it
+        {
+            if (Time.time > CorruptDelay)
+            {
+                CorruptDelay = Time.time + 10;
+                foreach (Renderer rend in GameObject.FindObjectsOfType<Renderer>())
+                {
+                    if (Random.Range(0, 150) == 0)
+                    {
+                        rend.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+                        rend.material.color = Color.magenta;
+                    }
+                    else
+                    {
+                        if (Random.Range(0, 5) == 0)
+                        {
+                            rend.material.mainTextureOffset = new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+                        }
+                    }
+                }
+            }
         }
     }
 }

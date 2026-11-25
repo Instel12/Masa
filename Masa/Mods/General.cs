@@ -12,7 +12,9 @@ namespace Masa.Mods
 {
     class General
     {
-        public static void UnlockAllCosmetics()
+        public static void JoinDiscord() => Application.OpenURL(Main.DiscordLink);
+
+        public static void LockAllCosmetics()
         {
             CosmeticsController.instance.unlockedCosmetics.Clear();
             CosmeticsController.instance.unlockedBacks.Clear();
@@ -28,6 +30,13 @@ namespace Masa.Mods
             CosmeticsController.instance.unlockedThrowables.Clear();
             CosmeticsController.instance.unlockedHoverboards.Clear();
 
+            CosmeticsController.instance.OnCosmeticsUpdated();
+        }
+
+        public static void UnlockAllCosmetics()
+        {
+            LockAllCosmetics();
+
             foreach (CosmeticItem cosmetic in CosmeticsController.instance.allCosmetics)
             {
                 try
@@ -36,7 +45,7 @@ namespace Masa.Mods
                 }
                 catch { }
             }
-            CosmeticsController.instance.OnCosmeticsUpdated?.Invoke();
+            CosmeticsController.instance.OnCosmeticsUpdated();
         }
 
         public static bool PlayerIDWait = false;
@@ -95,7 +104,7 @@ namespace Masa.Mods
             return "red";
         }
 
-        private static Vector3? oldLocalPosition = null;
+        private static Vector3 archClick = Vector3.one * float.MaxValue;
         public static void PCButtonClick()
         {
             if (Mouse.current.leftButton.isPressed)
@@ -103,16 +112,16 @@ namespace Masa.Mods
                 Ray ray = Camera.allCameras[1].ScreenPointToRay(Mouse.current.position.ReadValue());
                 Physics.Raycast(ray, out var Ray, 512f, GTPlayer.Instance.locomotionEnabledLayers);
 
-                if (oldLocalPosition == null) oldLocalPosition = GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition;
+                if (archClick == Vector3.one * float.MaxValue) archClick = GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition;
                 GorillaTagger.Instance.rightHandTriggerCollider.GetComponent<TransformFollow>().enabled = false;
                 GorillaTagger.Instance.rightHandTriggerCollider.transform.position = Ray.point;
             }
             else
             {
-                if (oldLocalPosition != null)
+                if (archClick != Vector3.one * float.MaxValue)
                 {
-                    GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition = oldLocalPosition.Value;
-                    oldLocalPosition = null;
+                    GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition = archClick;
+                    archClick = Vector3.one * float.MaxValue;
                 }
                 GorillaTagger.Instance.rightHandTriggerCollider.GetComponent<TransformFollow>().enabled = true;
             }
@@ -120,10 +129,18 @@ namespace Masa.Mods
 
         public static void DisablePCButtonClick()
         {
-            if (oldLocalPosition != null)
+            if (archClick != Vector3.one * float.MaxValue)
             {
-                GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition = oldLocalPosition.Value;
-                oldLocalPosition = null;
+                GorillaTagger.Instance.rightHandTriggerCollider.transform.localPosition = archClick;
+                archClick = Vector3.one * float.MaxValue;
+            }
+        }
+
+        public static void UpdateNameTags()
+        {
+            foreach (VRRig rig in VRRigCache.ActiveRigs)
+            {
+                rig.UpdateName(true);
             }
         }
     }

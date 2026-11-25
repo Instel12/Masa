@@ -463,13 +463,16 @@
     <Compile Include="Classes\AssetTools.cs" />
     <Compile Include="Classes\Button.cs" />
     <Compile Include="Classes\ButtonDriver.cs" />
+    <Compile Include="Classes\ColorChanger.cs" />
     <Compile Include="Classes\CoroutineRunner.cs" />
     <Compile Include="Classes\GradientManager.cs" />
     <Compile Include="Classes\GunData.cs" />
     <Compile Include="Classes\PrivateManager.cs" />
     <Compile Include="Classes\TMPHelper.cs" />
+    <Compile Include="Classes\UserNetworking.cs" />
     <Compile Include="Classes\VelocityTracker.cs" />
     <Compile Include="Classes\WebLib.cs" />
+    <Compile Include="Menu\Boards.cs" />
     <Compile Include="Menu\Buttons.cs" />
     <Compile Include="Menu\Main.cs" />
     <Compile Include="Menu\Notifications.cs" />
@@ -490,7 +493,7 @@
     <Compile Include="Patches\LeavePatch.cs" />
     <Compile Include="Patches\MOTDPatch.cs" />
     <Compile Include="Patches\NetworkTriggerPatch.cs" />
-    <Compile Include="Patches\NormalizeNamePatch.cs" />
+    <Compile Include="Patches\NameTagPatch.cs" />
     <Compile Include="Patches\QuitBoxPatch.cs" />
     <Compile Include="Patches\RankedPatch.cs" />
     <Compile Include="Patches\Safety\AnticheatPatch.cs" />
@@ -499,8 +502,10 @@
     <Compile Include="Patches\Safety\RigPatches.cs" />
     <Compile Include="Patches\Safety\RPCPatch.cs" />
     <Compile Include="Patches\PrimitivePatch.cs" />
+    <Compile Include="Patches\SlidePatch.cs" />
     <Compile Include="Patches\SubscriptionPatch.cs" />
     <Compile Include="Patches\TMPPatch.cs" />
+    <Compile Include="Patches\WindPatch.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
