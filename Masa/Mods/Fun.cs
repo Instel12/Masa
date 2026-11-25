@@ -267,8 +267,8 @@ namespace Masa.Mods
             {
                 if (rig != VRRig.LocalRig)
                 {
-                    if (Vector3.Distance(rig.headMesh.transform.position, GTPlayer.Instance.LeftHand.controllerTransform.position) < 0.3f &&
-                        Vector3.Distance(rig.headMesh.transform.position, GTPlayer.Instance.RightHand.controllerTransform.position) < 0.3f)
+                    if (Vector3.Distance(rig.headConstraint.transform.position, GTPlayer.Instance.LeftHand.controllerTransform.position) < 0.3f &&
+                        Vector3.Distance(rig.headConstraint.transform.position, GTPlayer.Instance.RightHand.controllerTransform.position) < 0.3f)
                     {
                         PlayHandTap(338);
                     }
@@ -450,18 +450,21 @@ namespace Masa.Mods
             if (Time.time > CorruptDelay)
             {
                 CorruptDelay = Time.time + 10;
-                foreach (Renderer rend in GameObject.FindObjectsOfType<Renderer>())
+                foreach (Renderer rend in GameObject.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
                 {
-                    if (Random.Range(0, 150) == 0)
+                    if (rend.gameObject.activeInHierarchy)
                     {
-                        rend.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-                        rend.material.color = Color.magenta;
-                    }
-                    else
-                    {
-                        if (Random.Range(0, 5) == 0)
+                        if (Random.Range(0, 150) == 0)
                         {
-                            rend.material.mainTextureOffset = new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+                            rend.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+                            rend.material.color = Color.magenta;
+                        }
+                        else
+                        {
+                            if (Random.Range(0, 5) == 0)
+                            {
+                                rend.material.mainTextureOffset = new Vector2(Random.Range(-5f, 5f), Random.Range(-5f, 5f));
+                            }
                         }
                     }
                 }

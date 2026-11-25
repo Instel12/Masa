@@ -30,7 +30,6 @@ namespace Masa.Patches
             Main.RegisterTMP(Header);
             Main.RegisterTMP(Body);
             Header.text = PluginInfo.Title;
-            Body.text = $"Thank you for choosing {PluginInfo.Title}!\n\nIf you use your head and your menu is up to date, you should be fine.\nAll mods: {Buttons.Buttans.Count}\nVersion: {PluginInfo.Version}\n\n<color=red>Nothing that happens to you while using this menu is on me.</color>";
         }
 
         public static void StockMOTD()

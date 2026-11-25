@@ -23,6 +23,7 @@ namespace Masa.Mods
             CosmeticsController.instance.unlockedFaces.Clear();
             CosmeticsController.instance.unlockedFurs.Clear();
             CosmeticsController.instance.unlockedHats.Clear();
+            CosmeticsController.instance.unlockedArms.Clear();
             CosmeticsController.instance.unlockedPants.Clear();
             CosmeticsController.instance.unlockedPaws.Clear();
             CosmeticsController.instance.unlockedShirts.Clear();

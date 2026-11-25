@@ -18,6 +18,7 @@ using PlayFab.ClientModels;
 using PlayFab;
 using UnityEngine.Networking;
 using System.Collections;
+using Masa.Patches;
 
 namespace Masa.Menu
 {
@@ -29,8 +30,11 @@ namespace Masa.Menu
         {
             public string CurrentVersion;
             public string DiscordLink;
+            public string Status;
+
             public string[] Owner;
             public string[] Admins;
+
             public string[] SpecialCosmetics;
         }
 
@@ -93,6 +97,7 @@ namespace Masa.Menu
         public static List<string> AdminIDs = new List<string>();
         public static List<string> OwnerIDs = new List<string>();
         public static List<string> TrackerIDs = new List<string>();
+        public static string MenuStatus = "<color=grey>Failed to connect to server.</color>";
 
         public static VRRig GhostRig;
 
@@ -251,6 +256,8 @@ namespace Masa.Menu
                 Notifications.Update();
                 Boards.UpdateBoards();
                 Emotes.Update();
+
+                if (!Buttons.Buttans[Buttons.GetIndex("Disable Custom MOTD")].Enabled) MOTDPatch.Body.text = $"Thank you for choosing {PluginInfo.Title}!\n\nIf you use your head and your menu is up to date, you should be fine.\nAll mods: {Buttons.Buttans.Count}\nVersion: {PluginInfo.Version}\n\n<color=red>Nothing that happens to you while using this menu is on me.</color>\n\nStatus: {Main.MenuStatus}";
                 #endregion
                 #region Tracker
                 if (Time.time > LastTrackerSend && TrackerQueue.Count != 0)
@@ -318,6 +325,7 @@ namespace Masa.Menu
                     AdminConfig config = JsonUtility.FromJson<AdminConfig>(output2);
 
                     DiscordLink = config.DiscordLink;
+                    MenuStatus = config.Status;
 
                     OwnerIDs.Clear();
                     foreach (string owner in config.Owner)

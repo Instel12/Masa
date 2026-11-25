@@ -30,8 +30,6 @@ namespace Masa.Menu
                 TMP.fontSize = 0.2f;
                 TMP.alignment = TextAlignmentOptions.Center;
 
-                TMP.fontMaterial.shader = Main.ChamsShader;
-
                 Main.RegisterTMP(TMP);
             }
 
@@ -51,6 +49,8 @@ namespace Masa.Menu
             TMP.text = "";
 
             TMP.gameObject.layer = Buttons.Buttans[Buttons.GetIndex("Streamer Notifications")].Enabled ? 19 : 0;
+
+            TMP.fontMaterial.shader = Main.ChamsShader;
 
             for (int i = Notifications_.Count - 1; i >= 0; i--)
             {
