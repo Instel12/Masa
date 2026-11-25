@@ -1,5 +1,4 @@
 ﻿<p style="text-align:center;"><img src="Masa/Resources/Logo.png"></p>
-<p style="text-align:center;"><b>⚠️ THIS MENU IS NOT READY FOR USE! ⚠️</b></p>
 
 # 
 
