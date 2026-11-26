@@ -329,7 +329,7 @@ namespace Masa.Mods
 
         public static void NoGravity()
         {
-            GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity, ForceMode.Acceleration);
+            GorillaTagger.Instance.rigidbody.AddForce(-Physics.gravity * GorillaTagger.Instance.rigidbody.mass);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Masa.Classes;
+﻿using Masa.Classes;
 using Masa.Menu;
 using Photon.Pun;
 using UnityEngine;
@@ -41,7 +38,8 @@ namespace Masa.Mods
                     {
                         CosmeticID = id,
                         Room = PhotonNetwork.CurrentRoom.Name,
-                        Player = rig.Creator.NickName
+                        Player = rig.Creator.NickName,
+                        UserID = NetworkSystem.Instance.GetUserID(rig.Creator.ActorNumber),
                     });
 
                     SafetyAction();

@@ -3,6 +3,7 @@ using GorillaLocomotion;
 using GorillaNetworking;
 using Masa.Classes;
 using Masa.Menu;
+using Masa.Patches;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -143,6 +144,13 @@ namespace Masa.Mods
             {
                 rig.UpdateName(true);
             }
+        }
+
+        public static void UnlockAllBlocks(bool unlock)
+        {
+            PieceOwnedPatch.Enabled = unlock;
+            BuilderSetManager.instance.OnLiveSetsUpdated.Invoke();
+            BuilderSetManager.instance.OnOwnedSetsUpdated.Invoke();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Masa.Menu;
 using UnityEngine;
 
 namespace Masa.Patches

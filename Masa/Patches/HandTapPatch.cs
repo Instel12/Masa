@@ -2,9 +2,7 @@
 using HarmonyLib;
 using Masa.Classes;
 using Masa.Menu;
-using Masa.Mods;
 using UnityEngine;
-using GorillaLocomotion;
 
 namespace Masa.Patches
 {

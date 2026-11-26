@@ -504,6 +504,7 @@
     <Compile Include="Patches\MOTDPatch.cs" />
     <Compile Include="Patches\NetworkTriggerPatch.cs" />
     <Compile Include="Patches\NameTagPatch.cs" />
+    <Compile Include="Patches\PieceOwnedPatch.cs" />
     <Compile Include="Patches\QuitBoxPatch.cs" />
     <Compile Include="Patches\RankedPatch.cs" />
     <Compile Include="Patches\Safety\AnticheatPatch.cs" />

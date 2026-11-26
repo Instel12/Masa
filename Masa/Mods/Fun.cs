@@ -4,9 +4,7 @@ using UnityEngine;
 using GorillaLocomotion;
 using Photon.Pun;
 using UnityEngine.InputSystem;
-using GorillaLocomotion.Swimming;
-using System.Diagnostics.Eventing.Reader;
-using Photon.Voice;
+using GorillaTagScripts;
 
 namespace Masa.Mods
 {
@@ -470,5 +468,34 @@ namespace Masa.Mods
                 }
             }
         }
+
+        public static float BlockDelay;
+        public static void SpawnBlock(int piece, Vector3 position, Quaternion rotation)
+        {
+            BuilderTable.TryGetBuilderTableForZone(VRRig.LocalRig.zoneEntity.currentZone, out BuilderTable table);
+            BuilderTableNetworking Networking = table.builderNetworking;
+
+            if (NetworkSystem.Instance.IsMasterClient && BlockDelay < Time.time)
+            {
+                BlockDelay = Time.time + 0.15f;
+                int id = table.CreatePieceId();
+
+                object[] args = {
+                    piece,
+                    id,
+                    BitPackUtils.PackWorldPosForNetwork(position),
+                    BitPackUtils.PackQuaternionForNetwork(rotation),
+                    0,
+                    (byte)4,
+                    1,
+                    PhotonNetwork.LocalPlayer
+                };
+
+                Networking.photonView.RPC("PieceCreatedByShelfRPC", RpcTarget.All, args);
+                Safety.FlushRPCs();
+            }
+        }
+
+
     }
 }

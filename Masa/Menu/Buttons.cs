@@ -8,7 +8,6 @@ using Masa.Mods;
 using Masa.Patches;
 using TMPro;
 using UnityEngine;
-using static Masa.Mods.Settings;
 using Random = UnityEngine.Random;
 
 namespace Masa.Menu
@@ -30,6 +29,7 @@ namespace Masa.Menu
             Emotes,
             Fun,
             Soundboard,
+            Master,
             Overpowered,
             Credits,
 
@@ -39,6 +39,12 @@ namespace Masa.Menu
 
         public static List<Button> Buttans = new List<Button>
         {
+            #region Dynamic Exit Buttons
+                // keep this on top always
+                new Button { Category = Categories.Enabled, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
+                new Button { Category = Categories.Favorite, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
+                new Button { Category = Categories.Master, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
+            #endregion
             #region Main
                 new Button { Category = Categories.Main, Title = "Settings", Description = "Enters Settings.", OneShot = true, Method =() => LoadCategory(Categories.Settings) },
                 new Button { Category = Categories.Main, Title = "<color=purple>Join Discord</color>", Description = "Join our tuff community.", OneShot = true, Method =() => General.JoinDiscord() },
@@ -52,15 +58,11 @@ namespace Masa.Menu
                 new Button { Category = Categories.Main, Title = "Emotes", Description = "Enters Emotes.", OneShot = true, Method =() => LoadCategory(Categories.Emotes) },
                 new Button { Category = Categories.Main, Title = "Safety", Description = "Enters Safety Mods.", OneShot = true, Method =() => LoadCategory(Categories.Safety) },
                 new Button { Category = Categories.Main, Title = "General", Description = "Enters General Mods.", OneShot = true, Method =() => LoadCategory(Categories.General) },
+                new Button { Category = Categories.Main, Title = "Master", Description = "Enters Master Mods.", OneShot = true, Method =() => LoadCategory(Categories.Master) },
                 new Button { Category = Categories.Main, Title = "Overpowered", Description = "Enters Overpowered Mods.", OneShot = true, Method =() => LoadCategory(Categories.Overpowered) },
                 new Button { Category = Categories.Main, Title = "Credits", Description = "Shows the credits.", OneShot = true, Method =() => LoadCategory(Categories.Credits) },
             #endregion
-            #region Enabled (this needs to be first always cause the menu is stupid)
-                new Button { Category = Categories.Enabled, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
-            #endregion
-            #region Favorite (this also needs to be first always cause the menu its also stupid)
-                new Button { Category = Categories.Favorite, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
-            #endregion
+
             #region Settings
                 new Button { Category = Categories.Settings, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
 
@@ -128,8 +130,9 @@ namespace Masa.Menu
                 },
 
                 new Button { Category = Categories.Settings, Title = "Left Hand Menu", Description = "Puts the menu in your left hand.", OneShot = false, EnableMethod =() => Main.LeftHandMenu = true, DisableMethod =() => Main.LeftHandMenu = false },
-                new Button { Category = Categories.Settings, Title = "Thick Menu", Description = "Makes the menu wider.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.4f, DisableMethod =() => Main.MenuWidth = 0.25f },
-                new Button { Category = Categories.Settings, Title = "Thin Menu", Description = "Makes the menu thin.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.15f, DisableMethod =() => Main.MenuWidth = 0.25f },
+                new Button { Category = Categories.Settings, Title = "Thick Menu", Description = "Makes the menu wider.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.4f, DisableMethod =() => Main.MenuWidth = 0.3f },
+                new Button { Category = Categories.Settings, Title = "Medium Menu", Description = "Makes the menu wider.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.3f, DisableMethod =() => Main.MenuWidth = 0.3f },
+                new Button { Category = Categories.Settings, Title = "Thin Menu", Description = "Makes the menu thin.", OneShot = false, EnableMethod =() => Main.MenuWidth = 0.25f, DisableMethod =() => Main.MenuWidth = 0.3f },
                 new Button { Category = Categories.Settings, Title = "Lerp Menu", Description = "Makes the menu's position smooth.", OneShot = false, EnableMethod =() => Main.SmoothMode = true, DisableMethod =() => Main.SmoothMode = false },
                 new Button { Category = Categories.Settings, Title = "Crystal Menu", OneShot = false, Description = "Makes all menu materials like a crystal from the Caves map.", EnableMethod =() => Main.CrystalMenu = true, DisableMethod =() => Main.CrystalMenu =  false },
                 new Button { Category = Categories.Settings, Title = "Disable Disconnect Button", Description = "Removes the disconnect button.", OneShot = false, EnableMethod =() => Main.DisableDisconnectButton = true, DisableMethod =() => Main.DisableDisconnectButton =  false },
@@ -197,6 +200,7 @@ namespace Masa.Menu
                 new Button { Category = Categories.Admin, Title = "Admin Minecraft Obsidian", Description = "Play Minecraft.", OneShot = false, Method =() => Admin.MinecraftGun("Obsidian") },
                 new Button { Category = Categories.Admin, Title = "Admin Minecraft Planks", Description = "Play Minecraft.", OneShot = false, Method =() => Admin.MinecraftGun("Planks") },
             #endregion
+
             #region Movement
                 new Button { Category = Categories.Movement, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
                 new Button { Category = Categories.Movement, Title = "Fly", Description = "Allows you to fly.", OneShot = false, PrefixMethod =() => Movement.Fly() },
@@ -218,11 +222,11 @@ namespace Masa.Menu
                 new Button { Category = Categories.Movement, Title = "Pull Mod", Description = "Pulls your player in the direction you are facing to make you faster.", OneShot = false, Method =() => Movement.PullMod() },
                 new Button { Category = Categories.Movement, Title = "Disable Wind Barriers", Description = "Wind barriers aint got shit on you!", OneShot = false, EnableMethod =() => WindPatch.WindDisabled = true, DisableMethod =() => WindPatch.WindDisabled = false },
                 new Button { Category = Categories.Movement, Title = "No Slip", Description = "Makes no surfaces slippery.", OneShot = false, EnableMethod =() => SlidePatch.NoSlip = true, DisableMethod =() => SlidePatch.NoSlip = false },
-                new Button { Category = Categories.Movement, Title = "All Slip", Description = "Makes all surfaces slippery.", OneShot = false, EnableMethod =() => SlidePatch.AllBlueWalls = true, DisableMethod =() => SlidePatch.AllBlueWalls = false },
+                //new Button { Category = Categories.Movement, Title = "All Slip", Description = "Makes all surfaces slippery.", OneShot = false, EnableMethod =() => SlidePatch.AllBlueWalls = true, DisableMethod =() => SlidePatch.AllBlueWalls = false },
                 new Button { Category = Categories.Movement, Title = "All Ice", Description = "Makes all surfaces fully slippery.", OneShot = false, EnableMethod =() => SlidePatch.AllRedWalls = true, DisableMethod =() => SlidePatch.AllRedWalls = false },
                 new Button { Category = Categories.Movement, Title = "Low Gravity", Description = "Makes the gravity less strong.", OneShot = false, Method =() => Movement.LowGravity() },
                 new Button { Category = Categories.Movement, Title = "High Gravity", Description = "Makes the gravity stronger.", OneShot = false, Method =() => Movement.HighGravity() },
-                new Button { Category = Categories.Movement, Title = "Zero Gravity", Description = "Makes gravity not pull you down.", OneShot = false, Method =() => Movement.HighGravity() },
+                //new Button { Category = Categories.Movement, Title = "Zero Gravity", Description = "Makes gravity not pull you down.", OneShot = false, Method =() => Movement.NoGravity() },
                 #region Maps
                     new Button { Category = Categories.Maps, Title = "Exit", Description = "Returns to Movement Mods.", OneShot = true, Method =() => LoadCategory(Categories.Movement) },
                 #endregion
@@ -262,6 +266,8 @@ namespace Masa.Menu
                 new Button { Category = Categories.Fun, Title = "Sound Spam [<color=grey>Jman</color>]", Description = "Spams a hand tap.", OneShot = false, Method =() => Fun.SoundSpam(Random.Range(336, 338)) },
                 new Button { Category = Categories.Fun, Title = "Literally Every Sound Spam", Description = "Enters a category with every hand tap.", OneShot = true, Method =() => LoadCategory(Categories.EverySound) },
 
+                new Button { Category = Categories.Fun, Title = "Slap", Description = "Slap other players.", OneShot = false, Method =() => Fun.Slap() },
+
                 new Button { Category = Categories.Fun, Title = "Open Basement Door", Description = "Opens the basement door enterance.", OneShot = true, Method =() => Fun.OpenNaNoor(true) },
                 new Button { Category = Categories.Fun, Title = "Close Basement Door", Description = "Closes the basement door enterance.", OneShot = true, Method =() => Fun.OpenNaNoor(false) },
                 new Button { Category = Categories.Fun, Title = "Basement Door Spam", Description = "Quickly opens and closes the basement door enterance.", OneShot = false, Method =() => Fun.OpenNaNoorSpam() },
@@ -290,8 +296,6 @@ namespace Masa.Menu
                 #region Every Sound
                     new Button { Category = Categories.EverySound, Title = "Exit", Description = "Returns to Fun Mods.", OneShot = true, Method =() => LoadCategory(Categories.Fun) },
                 #endregion
-
-                new Button { Category = Categories.Fun, Title = "Slap", Description = "Slap other players.", OneShot = false, Method =() => Fun.Slap() },
             #endregion
             #region Safety
             new Button { Category = Categories.Safety, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
@@ -321,6 +325,7 @@ namespace Masa.Menu
                 new Button { Category = Categories.General, Title = "View Other's Unowned Cosmetics", Description = "Lets you see what sombody has equipped even if they don't own it.", OneShot = false, EnableMethod =() => CosmeticPatches.ViewOthersCosmetics = true, DisableMethod =() => CosmeticPatches.ViewOthersCosmetics = false },
                 new Button { Category = Categories.General, Title = "Unlock All Cosmetics", Description = "Unlocks every cosmetic on your wardrobe.", OneShot = true, Method =() => General.UnlockAllCosmetics() },
                 new Button { Category = Categories.General, Title = "Lock All Cosmetics", Description = "Locks every cosmetic on your wardrobe.", OneShot = true, Method =() => General.LockAllCosmetics() },
+                new Button { Category = Categories.General, Title = "Unlock All Sets", Description = "Unlocks every set in Monke Blocks.", OneShot = false, Master = true, EnableMethod =() => General.UnlockAllBlocks(true), DisableMethod =() => General.UnlockAllBlocks(false) },
                 new Button { Category = Categories.General, Title = "Copy ID Gun", Description = "Copies a player's ID.", OneShot = false, Method =() => General.GetPlayerIDGun() },
                 new Button { Category = Categories.General, Title = "Unlock VIM", Description = "Unlocks the Gorilla Tag Fan Club.", OneShot = false, EnableMethod =() => SubscriptionPatch.Enabled = true, DisableMethod =() => SubscriptionPatch.Enabled = false },
                 new Button { Category = Categories.General, Title = "Unlock Competetive", Description = "Unlocks the ability to play in competetive queue.", OneShot = true, Method =() => General.UnlockCompetetive() },
@@ -328,6 +333,7 @@ namespace Masa.Menu
                 new Button { Category = Categories.General, Title = "Player Info Tags", Description = "Puts some player info on top of everyone's head. (Looks like Untitled lol)", OneShot = false, Method =() => General.PlayerInfoTags() },
                 new Button { Category = Categories.General, Title = "PC Button Click", Description = "Lets you click buttons with your mouse.", OneShot = false, Method =() => General.PCButtonClick(), DisableMethod =() => General.DisablePCButtonClick() },
                 new Button { Category = Categories.General, Title = "Update Nametags", Description = "Refreshes everyone's nametag.", OneShot = true, Method =() => General.UpdateNameTags() },
+                new Button { Category = Categories.General, Title = "Disable Tracker", Description = "Makes your game not contribute to the Masa Tracker.", OneShot = false, EnableMethod =() => Main.DisableTracker = true, DisableMethod =() => Main.DisableTracker = false },
             #endregion
             #region Overpowered
                 new Button { Category = Categories.Overpowered, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },

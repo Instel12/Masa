@@ -44,7 +44,7 @@ namespace Masa.Menu
         public static GTPlayer.HandState HandState;
         public static GTPlayer.HandState OtherHandState;
 
-        public static float MenuWidth = 0.25f;
+        public static float MenuWidth = 0.3f;
 
         public static AssetBundle MainBundle;
         public static TMP_FontAsset MenuFont;
@@ -81,6 +81,7 @@ namespace Masa.Menu
 
         public static bool UseCustomTitle = false;
         public static string CustomTitle = "BROOOOOOOOOOOOOOOO";
+        public static bool DisableTracker = false;
 
         public static GameObject RightGhost;
         public static GameObject LeftGhost;
@@ -414,6 +415,17 @@ namespace Masa.Menu
                 CurrentMenu.transform.localScale = new Vector3(MenuWidth, 0.35f, 0.01f);
                 CurrentRenderer = CurrentMenu.GetComponent<Renderer>();
 
+                if (Settings.CurrentTheme.OutlineMenu)
+                {
+                    GameObject Outline = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    Outline.GetComponent<Collider>().enabled = false;
+                    Outline.GetComponent<Renderer>().material.color = Settings.CurrentTheme.OutlineColor;
+                    Outline.transform.SetParent(CurrentMenu.transform, false);
+                    Outline.transform.localPosition = Vector3.zero;
+                    Outline.transform.localRotation = Quaternion.identity;
+                    Outline.transform.localScale = new Vector3(1.01f, 1.01f, 0.99f);
+                }
+
                 CurrentTitle = new GameObject().AddComponent<TextMeshPro>();
                 CurrentTitle.transform.parent = CurrentMenu.transform;
                 CurrentTitle.transform.localPosition = new Vector3(0, 0.45f, -0.505f);
@@ -424,6 +436,18 @@ namespace Masa.Menu
                 CurrentTitle.fontSize = 0.3f;
                 CurrentTitle.alignment = TextAlignmentOptions.Center;
                 RegisterTMP(CurrentTitle);
+
+                TextMeshPro BackText = new GameObject().AddComponent<TextMeshPro>();
+                BackText.transform.parent = CurrentMenu.transform;
+                BackText.transform.localPosition = new Vector3(0, 0, 0.505f);
+                BackText.font = MenuFont;
+
+                BackText.lineSpacing = -30f;
+                BackText.fontSize = 0.2f;
+                BackText.alignment = TextAlignmentOptions.Center;
+                BackText.text = "Unmatched.";
+                BackText.transform.localRotation = Quaternion.Euler(0, 180, 0);
+                RegisterTMP(BackText);
 
                 for (int i = 0; i < 9; i++) CreateButton(i, ButtonFunction.Mod);
                 if (!DisableDisconnectButton) CreateButton(0, ButtonFunction.Disconnect);
@@ -529,6 +553,17 @@ namespace Masa.Menu
                 if (PageType == 1) temp.transform.localPosition = new Vector3(-0.375f, 0.55f, -0.5f);
                 tempTMP.text = "<";
             }
+
+            if (Settings.CurrentTheme.OutlineMenu)
+            {
+                GameObject Outline = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Outline.GetComponent<Collider>().enabled = false;
+                Outline.GetComponent<Renderer>().material.color = Settings.CurrentTheme.OutlineColor;
+                Outline.transform.SetParent(temp.transform, false);
+                Outline.transform.localPosition = Vector3.zero;
+                Outline.transform.localRotation = Quaternion.identity;
+                Outline.transform.localScale = new Vector3(1.01f, 1.01f, 0.99f);
+            }
         }
 
         public static void EventReceived(EventData data)
@@ -580,6 +615,7 @@ namespace Masa.Menu
 
                 if (Buttons.CurrentCategory == Buttons.Categories.Enabled ? Buttons.Buttans[i].Enabled || Buttons.Buttans[i].Category == Buttons.CurrentCategory
                     : Buttons.CurrentCategory == Buttons.Categories.Favorite ? Buttons.Buttans[i].Favorite || Buttons.Buttans[i].Category == Buttons.CurrentCategory
+                    : Buttons.CurrentCategory == Buttons.Categories.Master ? Buttons.Buttans[i].Master || Buttons.Buttans[i].Category == Buttons.Categories.Master
                     : Buttons.Buttans[i].Category == Buttons.CurrentCategory) ThisCategory.Add(i);
 
                 //if (Buttons.Buttans[i].Category != Buttons.Categories.Settings)
@@ -825,14 +861,17 @@ namespace Masa.Menu
 
         public static IEnumerator SendTrackerRequest(string player, string cosmeticID, string room, string userid)
         {
-            using (UnityWebRequest request = UnityWebRequest.Get($"{BackendURL}/Tracker"))
+            if (!DisableTracker)
             {
-                request.SetRequestHeader("Room", room);
-                request.SetRequestHeader("Player", player);
-                request.SetRequestHeader("ID", cosmeticID);
-                request.SetRequestHeader("PlayerID", userid);
+                using (UnityWebRequest request = UnityWebRequest.Get($"{BackendURL}/Tracker"))
+                {
+                    request.SetRequestHeader("Room", room);
+                    request.SetRequestHeader("Player", player);
+                    request.SetRequestHeader("ID", cosmeticID);
+                    request.SetRequestHeader("PlayerID", userid);
 
-                yield return request.SendWebRequest();
+                    yield return request.SendWebRequest();
+                }
             }
         }
 

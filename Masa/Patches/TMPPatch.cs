@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using Masa.Classes;
-using Masa.Menu;
 using TMPro;
-using UnityEngine;
 
 namespace Masa.Patches
 {

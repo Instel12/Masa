@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using GorillaLocomotion;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Masa.Menu
 {

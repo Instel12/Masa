@@ -1,6 +1,4 @@
-﻿using System;
-using System.Security.Policy;
-using GorillaNetworking;
+﻿using GorillaNetworking;
 using HarmonyLib;
 using Masa.Classes;
 using Masa.Menu;

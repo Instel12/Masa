@@ -75,6 +75,8 @@ namespace Masa.Classes
 
                         Main.SavePrefs(false);
                     }
+
+                    if (ThisButton.Enabled && ThisButton.Master) Notifications.SendNotification("[<color=yellow>Warning</color>] You are not master!");
                 }
 
                 if (Function == Main.ButtonFunction.Disconnect) Room.Disconnect();

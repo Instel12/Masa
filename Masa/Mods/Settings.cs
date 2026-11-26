@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using GorillaTag.Cosmetics;
 using Masa.Classes;
 using Masa.Menu;
 using TMPro;
@@ -18,6 +17,9 @@ namespace Masa.Mods
 
             public Color TitleColor = Color.white;
             public Color ButtonColor = Color.white;
+
+            public Color OutlineColor = Color.white;
+            public bool OutlineMenu = false;
 
             public bool FlushButtons = false;
 
@@ -38,6 +40,20 @@ namespace Masa.Mods
         {
             {
                 "Masa", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.black,
+                        new Color(0.5f, 0, 0),
+                        Color.black
+                    },
+
+                    OutlineMenu = true,
+                    OutlineColor = Color.black
+                }
+            },
+            {
+                "OG Masa", () => new Theme
                 {
                     Colors = new List<Color>
                     {
@@ -98,6 +114,23 @@ namespace Masa.Mods
                 }
             },
             {
+                "Seralyth", () => new Theme
+                {
+                    Colors = new List<Color> { new Color32(22, 22, 22, 128) },
+                    Disabled = new Color32(118, 6, 252, 128),
+                    Enabled = new Color32(98, 0, 232, 128)
+                }
+            },
+            {
+                "Poison", () => new Theme
+                {
+                    Colors = new List<Color> { new Color32(22, 22, 22, 128) },
+                    Disabled = new Color32(6, 252, 118, 255),
+                    Enabled = new Color32(4, 188, 88, 255)
+                }
+            },
+
+            {
                 "Shiba Gold", () => new Theme
                 {
                     Colors = new List<Color>
@@ -109,14 +142,6 @@ namespace Masa.Mods
                     Enabled = Color.magenta,
                     Disabled = Color.yellow,
                     ButtonColor = Color.black
-                }
-            },
-            {
-                "Seralyth", () => new Theme
-                {
-                    Colors = new List<Color> { new Color32(22, 22, 22, 128) },
-                    Disabled = new Color32(118, 6, 252, 128),
-                    Enabled = new Color32(98, 0, 232, 128)
                 }
             },
             {
@@ -258,10 +283,117 @@ namespace Masa.Mods
                     {
                         Color.darkGreen
                     },
-                    Enabled = Color.magenta,
-                    Disabled = Color.blue,
+                    Enabled = Color.orange,
+                    Disabled = Color.magenta,
                     TitleColor = Color.red,
-                    ButtonColor = Color.limeGreen
+                    ButtonColor = Color.limeGreen,
+                    OutlineMenu = true,
+                    OutlineColor = Color.blue
+                }
+            },
+            {
+                "Sky", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.royalBlue,
+                        Color.lightBlue,
+                        Color.royalBlue
+                    },
+                    Enabled = Color.lightBlue,
+                    Disabled = Color.aliceBlue,
+                    TitleColor = Color.royalBlue,
+                    ButtonColor = Color.royalBlue
+                }
+            },
+            {
+                "Greyscale", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        new Color(0.3f, 0.3f, 0.3f)
+                    },
+                    Enabled = Color.grey,
+                    Disabled = Color.lightGray,
+                }
+            },
+            {
+                "Monke Mod Menu", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.black
+                    },
+                    Enabled = Color.green,
+                    Disabled = Color.red,
+                }
+            },
+            {
+                "Heat (OG OG OG LeBron)", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        new Color(0.5f, 0, 0)
+                    },
+                    Enabled = Color.orange,
+                    Disabled = Color.gold,
+                }
+            },
+            {
+                "Cavaliers (OG OG LeBron)", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.darkRed
+                    },
+                    Enabled = new Color(0.2f, 0.2f, 0.2f),
+                    Disabled = Color.gold,
+                }
+            },
+            {
+                "Lakers (OG LeBron)", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.rebeccaPurple
+                    },
+                    Enabled = Color.orange,
+                    Disabled = Color.yellow,
+                }
+            },
+            {
+                "76ers (LeBron)", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.darkBlue,
+                    },
+                    Enabled = Color.red,
+                    Disabled = Color.royalBlue,
+                }
+            },
+            {
+                "Error", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.magenta,
+                    },
+                    Enabled = Color.magenta,
+                    Disabled = Color.magenta,
+                }
+            },
+            {
+                "J0ker Client", () => new Theme
+                {
+                    Colors = new List<Color>
+                    {
+                        Color.black,
+                    },
+                    Enabled = Color.grey,
+                    Disabled = Color.black,
+
+                    OutlineMenu = true
                 }
             },
         };
