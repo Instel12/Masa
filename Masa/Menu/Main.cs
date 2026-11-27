@@ -120,75 +120,7 @@ namespace Masa.Menu
             {
                 #region Main Menu
                 if (!HasInit) Init();
-
-                MenuButton = LeftHandMenu ? ControllerInputPoller.instance.leftControllerSecondaryButton : ControllerInputPoller.instance.rightControllerSecondaryButton;
-                if (Keyboard.current.fKey.isPressed) MenuButton = true;
-                HandState = LeftHandMenu ? GTPlayer.Instance.LeftHand : GTPlayer.Instance.RightHand;
-                OtherHandState = !LeftHandMenu ? GTPlayer.Instance.LeftHand : GTPlayer.Instance.RightHand;
-
-                if (MenuButton)
-                {
-                    CreateMenu();
-
-                    Vector3 targetPosition = HandState.controllerTransform.position;
-
-                    if (LeftHandMenu) targetPosition -= HandState.controllerTransform.right * -0.05f;
-                    else targetPosition += HandState.controllerTransform.right * -0.05f;
-
-                    Quaternion targetRotation = HandState.controllerTransform.rotation;
-
-                    if (LeftHandMenu) targetRotation *= Quaternion.Euler(0, -90, -90);
-                    else targetRotation *= Quaternion.Euler(0, 90, 90);
-
-                    if (SmoothMode)
-                    {
-                        CurrentMenu.transform.position = Vector3.Lerp(CurrentMenu.transform.position, targetPosition, Time.deltaTime * SmoothSpeed);
-                        CurrentMenu.transform.rotation = Quaternion.Slerp(CurrentMenu.transform.rotation, targetRotation, Time.deltaTime * SmoothSpeed);
-                    }
-                    else
-                    {
-                        CurrentMenu.transform.position = targetPosition;
-                        CurrentMenu.transform.rotation = targetRotation;
-                    }
-
-
-
-                    if (Keyboard.current.fKey.isPressed)
-                    {
-                        CurrentMenu.transform.position = Camera.allCameras[1].transform.position + Camera.allCameras[1].transform.forward * 0.5f;
-                        CurrentMenu.transform.rotation = Camera.allCameras[1].transform.rotation;
-                        //CurrentMenu.transform.Rotate(0, 180, 0);
-                    }
-
-                    Pointer.transform.position = OtherHandState.controllerTransform.position;
-                    Pointer.transform.rotation = OtherHandState.controllerTransform.rotation;
-                    Pointer.transform.Rotate(90, 0, 0);
-                    Pointer.transform.position += Pointer.transform.forward * 0.1f;
-
-                    string originalTitle = UseCustomTitle ? CustomTitle : PluginInfo.Title;
-                    string tempTitle = AnimatedTitle ? originalTitle.Substring(0, (int)Mathf.PingPong(Time.time * 3f, originalTitle.Length + 1)) : originalTitle;
-                    if (TimeFooter) tempTitle += $"\n<size=0.1>{DateTime.Now.ToString("hh:mm tt")}</size>";
-                    if (FPSFooter) tempTitle += $"\n<size=0.1>{Mathf.Round(1f / Time.unscaledDeltaTime)} FPS</size>";
-                    if (PageFooter) tempTitle += $"\n<size=0.1>Page {Buttons.Page + 1}/{Math.Ceiling(ThisCategory.Count / 9f)}</size>";
-                    CurrentTitle.text = tempTitle;
-
-                    if (Settings.CurrentTheme.IsBread)
-                    {
-                        CurrentRenderer.material = BreadMaterial;
-                        CurrentRenderer.material.color = Color.white;
-                    }
-                    else
-                    {
-                        if (CrystalMenu) CurrentRenderer.material = CrystalMaterial;
-                        else CurrentRenderer.material.mainTexture = WhiteSquareLol;
-                        
-                        CurrentRenderer.material.color = GradientManager.GetColor();
-                    }
-                }
-                else
-                {
-                    DestroyMenu();
-                }
+                HandleMenu();
 
                 if (!File.Exists(Path.Combine(Paths.GameRootPath, PluginInfo.Title, "CustomTitle.txt")))
                 {
@@ -283,6 +215,75 @@ namespace Masa.Menu
             catch (Exception ex)
             {
                 Debug.LogError(ex);
+            }
+        }
+
+        public static void HandleMenu()
+        {
+            MenuButton = LeftHandMenu ? ControllerInputPoller.instance.leftControllerSecondaryButton : ControllerInputPoller.instance.rightControllerSecondaryButton;
+            if (Keyboard.current.fKey.isPressed) MenuButton = true;
+            HandState = LeftHandMenu ? GTPlayer.Instance.LeftHand : GTPlayer.Instance.RightHand;
+            OtherHandState = !LeftHandMenu ? GTPlayer.Instance.LeftHand : GTPlayer.Instance.RightHand;
+
+            if (MenuButton)
+            {
+                CreateMenu();
+
+                Vector3 targetPosition = HandState.controllerTransform.position;
+
+                if (LeftHandMenu) targetPosition -= HandState.controllerTransform.right * -0.05f;
+                else targetPosition += HandState.controllerTransform.right * -0.05f;
+
+                Quaternion targetRotation = HandState.controllerTransform.rotation;
+
+                if (LeftHandMenu) targetRotation *= Quaternion.Euler(0, -90, -90);
+                else targetRotation *= Quaternion.Euler(0, 90, 90);
+
+                if (SmoothMode)
+                {
+                    CurrentMenu.transform.position = Vector3.Lerp(CurrentMenu.transform.position, targetPosition, Time.deltaTime * SmoothSpeed);
+                    CurrentMenu.transform.rotation = Quaternion.Slerp(CurrentMenu.transform.rotation, targetRotation, Time.deltaTime * SmoothSpeed);
+                }
+                else
+                {
+                    CurrentMenu.transform.position = targetPosition;
+                    CurrentMenu.transform.rotation = targetRotation;
+                }
+
+                if (Keyboard.current.fKey.isPressed)
+                {
+                    CurrentMenu.transform.position = Camera.allCameras[1].transform.position + Camera.allCameras[1].transform.forward * 0.5f;
+                    CurrentMenu.transform.rotation = Camera.allCameras[1].transform.rotation;
+                }
+
+                Pointer.transform.position = OtherHandState.controllerTransform.position;
+                Pointer.transform.rotation = OtherHandState.controllerTransform.rotation;
+                Pointer.transform.Rotate(90, 0, 0);
+                Pointer.transform.position += Pointer.transform.forward * 0.1f;
+
+                string originalTitle = UseCustomTitle ? CustomTitle : PluginInfo.Title;
+                string tempTitle = AnimatedTitle ? originalTitle.Substring(0, (int)Mathf.PingPong(Time.time * 3f, originalTitle.Length + 1)) : originalTitle;
+                if (TimeFooter) tempTitle += $"\n<size=0.1>{DateTime.Now.ToString("hh:mm tt")}</size>";
+                if (FPSFooter) tempTitle += $"\n<size=0.1>{Mathf.Round(1f / Time.unscaledDeltaTime)} FPS</size>";
+                if (PageFooter) tempTitle += $"\n<size=0.1>Page {Buttons.Page + 1}/{Math.Ceiling(ThisCategory.Count / 9f)}</size>";
+                CurrentTitle.text = tempTitle;
+
+                if (Settings.CurrentTheme.IsBread)
+                {
+                    CurrentRenderer.material = BreadMaterial;
+                    CurrentRenderer.material.color = Color.white;
+                }
+                else
+                {
+                    if (CrystalMenu) CurrentRenderer.material = CrystalMaterial;
+                    else CurrentRenderer.material.mainTexture = WhiteSquareLol;
+
+                    CurrentRenderer.material.color = GradientManager.GetColor();
+                }
+            }
+            else
+            {
+                DestroyMenu();
             }
         }
 

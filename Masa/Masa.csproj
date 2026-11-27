@@ -497,6 +497,7 @@
     <Compile Include="Mods\Safety.cs" />
     <Compile Include="Mods\Settings.cs" />
     <Compile Include="Mods\Soundboard.cs" />
+    <Compile Include="Patches\CineMachinePatch.cs" />
     <Compile Include="Patches\CosmeticPatches.cs" />
     <Compile Include="Patches\DearLemmingPatch.cs" />
     <Compile Include="Patches\HandTapPatch.cs" />
