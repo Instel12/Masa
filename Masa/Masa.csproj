@@ -500,6 +500,7 @@
     <Compile Include="Patches\CosmeticPatches.cs" />
     <Compile Include="Patches\DearLemmingPatch.cs" />
     <Compile Include="Patches\HandTapPatch.cs" />
+    <Compile Include="Patches\KIDPatch.cs" />
     <Compile Include="Patches\LeavePatch.cs" />
     <Compile Include="Patches\MOTDPatch.cs" />
     <Compile Include="Patches\NetworkTriggerPatch.cs" />
@@ -525,7 +526,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Logo.png" />

@@ -334,6 +334,7 @@ namespace Masa.Menu
                 new Button { Category = Categories.General, Title = "PC Button Click", Description = "Lets you click buttons with your mouse.", OneShot = false, Method =() => General.PCButtonClick(), DisableMethod =() => General.DisablePCButtonClick() },
                 new Button { Category = Categories.General, Title = "Update Nametags", Description = "Refreshes everyone's nametag.", OneShot = true, Method =() => General.UpdateNameTags() },
                 new Button { Category = Categories.General, Title = "Disable Tracker", Description = "Makes your game not contribute to the Masa Tracker.", OneShot = false, EnableMethod =() => Main.DisableTracker = true, DisableMethod =() => Main.DisableTracker = false },
+                new Button { Category = Categories.General, Title = "Bypass K-ID", Description = "Allows you to access every feature even if you have age restrictions.", OneShot = false, EnableMethod =() => KIDPatch.Bypass = true, DisableMethod =() => KIDPatch.Bypass = false },
             #endregion
             #region Overpowered
                 new Button { Category = Categories.Overpowered, Title = "Exit", Description = "Returns to the main menu.", OneShot = true, Method =() => LoadCategory(Categories.Main) },
